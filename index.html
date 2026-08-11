@@ -69,6 +69,30 @@
             font-size: 26px;
             font-weight: 700;
             letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 雲端同步狀態指示徽章 */
+        #syncIndicator {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+        .sync-badge-online {
+            background-color: #eef0eb;
+            color: var(--primary-color);
+            border: 1px solid #cbd7c9;
+        }
+        .sync-badge-offline {
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
         }
 
         .header-btn-group {
@@ -575,7 +599,10 @@
 <div class="container">
     <!-- 頂部標題區 -->
     <div class="header-area">
-        <h1>📚 我的英文單字學習本</h1>
+        <h1>
+            📚 我的英文單字學習本
+            <span id="syncIndicator"></span>
+        </h1>
         <div class="header-btn-group">
             <button id="pwBtn" class="teacher-only" onclick="changePassword()" title="修改密碼">⚙️</button>
             <button id="loginBtn" onclick="handleLoginToggle()" title="管理員登入">🔑</button>
@@ -669,7 +696,7 @@
         </div>
     </div>
 
-    <!-- 模式二：相似字群組表單 (已移除主題欄位) -->
+    <!-- 模式二：相似字群組表單 -->
     <div id="similarFormSection" class="form-section teacher-only">
         <div class="tab-buttons">
             <button class="tab-btn active" id="tabSimilarSingleBtn" onclick="switchSimilarTab('single')">單筆字組</button>
@@ -767,6 +794,15 @@
 </div>
 
 <script>
+    // =========================================================================
+    // 🌐 雲端資料同步設定 (Cloud Sync Configuration)
+    // -------------------------------------------------------------------------
+    // 教師將導出的資料 (.json) 上傳至免費空間（如 GitHub Gist, Pastebin Raw 或是個人主機）
+    // 並將該直連 Raw JSON 網址貼在下方雙引號中。
+    // * 若此欄留空，網頁會自動切回讀取學生個人瀏覽器的本地快取。
+    // =========================================================================
+    const CLOUD_DATA_URL = "https://gist.githubusercontent.com/Jerryfish0126/8a5c35579215dcd86e62809f2cf4c955/raw/ad82fa323dd0a0b56cd0af1ce684170ad649abb1/vocab.json"; 
+
     // 預設一體化學習本示範資料
     const defaultUnifiedBooks = [
         {
@@ -815,62 +851,74 @@
     let currentSortColumn = 'english'; 
     let isSortAsc = true;           
 
-    window.onload = function() {
+    window.onload = async function() {
         // 1. 初始化密碼
         const currentPasswordInStorage = localStorage.getItem('adminPassword');
         if (!currentPasswordInStorage || currentPasswordInStorage === 'teacher123') {
             localStorage.setItem('adminPassword', '970126'); 
         }
 
-        // 2. 自動升級與合併舊資料
+        // 2. 嘗試自雲端讀取資料
+        await loadData();
+
+        updateBookDropdown();
+        renderActiveMode();
+    };
+
+    // ==========================================
+    // 智慧型雲端/本地自動切換資料讀取引擎
+    // ==========================================
+    async function loadData() {
+        if (CLOUD_DATA_URL && CLOUD_DATA_URL.trim() !== "") {
+            try {
+                // 發起異步網絡請求
+                const response = await fetch(CLOUD_DATA_URL);
+                if (!response.ok) throw new Error("網路連線或檔案存取失敗");
+                
+                const cloudData = await response.json();
+                if (Array.isArray(cloudData) && cloudData.length > 0) {
+                    bookList = cloudData;
+                    // 同步寫入本地快取，防止離線時無法複習
+                    localStorage.setItem('myVocabBooks_v7_unified', JSON.stringify(bookList));
+                    showSyncStatus(true);
+                    
+                    if (bookList.length > 0) {
+                        currentBookId = bookList[0].id;
+                    }
+                    return;
+                }
+            } catch (error) {
+                console.warn("❌ 雲端同步失敗，改為讀取本地快取資料:", error);
+                showSyncStatus(false, "已載入本地備份資料");
+            }
+        }
+
+        // 雲端不可用或無雲端配置，回退至讀取瀏覽器 LocalStorage
         const storedUnified = localStorage.getItem('myVocabBooks_v7_unified');
         if (storedUnified) {
             bookList = JSON.parse(storedUnified);
         } else {
-            const v6Data = localStorage.getItem('myVocabBooks_v6');
-            const simData = localStorage.getItem('myVocabSimilarBooks_v1');
-            
-            if (v6Data || simData) {
-                const v6List = v6Data ? JSON.parse(v6Data) : [];
-                const simList = simData ? JSON.parse(simData) : [];
-                const booksMap = {};
-
-                v6List.forEach(b => {
-                    booksMap[b.name] = { id: b.id, name: b.name, words: b.words || [], similarGroups: [] };
-                });
-
-                simList.forEach(sb => {
-                    if (booksMap[sb.name]) {
-                        const upgradedGroups = (sb.groups || []).map(g => {
-                            return { ...g, type: g.type || "相似字" };
-                        });
-                        booksMap[sb.name].similarGroups = upgradedGroups;
-                    } else {
-                        const upgradedGroups = (sb.groups || []).map(g => {
-                            return { ...g, type: g.type || "相似字" };
-                        });
-                        booksMap[sb.name] = { id: sb.id, name: sb.name, words: [], similarGroups: upgradedGroups };
-                    }
-                });
-                bookList = Object.values(booksMap);
-            } else {
-                bookList = defaultUnifiedBooks;
-            }
+            bookList = defaultUnifiedBooks;
             saveToLocalStorage();
         }
 
         if (bookList.length > 0) {
             currentBookId = bookList[0].id;
-        } else {
-            const id = "book-" + Date.now();
-            bookList.push({ id: id, name: "新學習本", words: [], similarGroups: [] });
-            currentBookId = id;
-            saveToLocalStorage();
         }
+    }
 
-        updateBookDropdown();
-        renderActiveMode();
-    };
+    function showSyncStatus(isOnline, customText) {
+        const indicator = document.getElementById('syncIndicator');
+        if (!indicator) return;
+        indicator.style.display = 'inline-block';
+        if (isOnline) {
+            indicator.className = 'sync-badge-online';
+            indicator.innerText = '🌐 雲端已同步';
+        } else {
+            indicator.className = 'sync-badge-offline';
+            indicator.innerText = customText || '🔌 本地離線模式';
+        }
+    }
 
     function saveToLocalStorage() {
         localStorage.setItem('myVocabBooks_v7_unified', JSON.stringify(bookList));
