@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>個人英文單字學習本</title>
+    <style>
+        /* 專注力心理學色彩系統 (日系書房與森林色調) */
+        :root {
+            --bg-color: #faf8f5;          /* 暖燕麥色背景 */
+            --container-bg: #fdfdfb;      /* 象牙白紙張感 */
+            --primary-color: #2d5a27;     /* 森林深綠 (用於相似字) */
+            --primary-hover: #1e3d17;
+            --accent-color: #8c7ae6;      /* 溫和紫羅蘭 (用於關聯字) */
+            --success-color: #3f6212;     /* 抹茶綠 */
+            --success-hover: #2d4a0c;
+            --warning-color: #b45309;     /* 橡木暖橙 (用於混淆字) */
+            --warning-hover: #92400e;
+            --danger-color: #991b1b;      /* 磚紅 */
+            --danger-hover: #7f1d1d;
+            
+            --text-color: #24292f;        /* 沉穩炭灰 */
+            --text-muted: #57606a;        /* 輔助灰色 */
+            --border-color: #e1e4e6;      /* 溫和細邊框 */
+            --shadow-subtle: 0 4px 20px rgba(45, 90, 39, 0.04);
+        }
+
+        /* 徹底解決寬高撐開、內邊距擠壓歪斜的黃金關鍵 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px; /* 大螢幕縮減外邊距以保留最大顯示區域 */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1400px; /* 升級：寬螢幕滿版體驗，最大寬度擴展至 1400px */
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        /* 頂部控制區 */
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            margin: 0;
+            color: var(--primary-color);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header-btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        #loginBtn, #pwBtn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            padding: 0;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #loginBtn { color: var(--primary-color); }
+        #loginBtn:hover {
+            background-color: #f3f4f6;
+            border-color: var(--primary-color);
+        }
+
+        #pwBtn { color: var(--text-muted); }
+        #pwBtn:hover {
+            background-color: #f3f4f6;
+            border-color: #4b5563;
+        }
+
+        body.admin-mode #loginBtn {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+            color: #ef4444;
+        }
+
+        /* 模式切換 Tabs */
+        .mode-toggle-area {
+            display: flex;
+            background-color: #f1f3f0;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mode-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .mode-tab.active {
+            background-color: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* 學習成就看板 */
+        .dashboard-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background-color: #fbfbfa;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            background-color: #f1f3f0;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* 統一日期選擇區域 */
+        .book-selector-area {
+            background-color: #f5f6f3;
+            padding: 18px 22px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border: 1px solid #e2e5e1;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .book-selector-area label {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 15px;
+        }
+
+        .book-select {
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: white;
+            min-width: 250px;
+            color: var(--text-color);
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* 功能控制 */
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-bar {
+            flex: 1;
+            min-width: 220px;
+            padding: 11px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background-color: white;
+            transition: all 0.2s;
+        }
+
+        .search-bar:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.08);
+        }
+
+        /* 按鈕風格 */
+        .btn {
+            padding: 10px 18px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: var(--success-hover); }
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+        .btn-secondary { background-color: #4b5563; }
+        .btn-secondary:hover { background-color: #374151; }
+        .btn-warning { background-color: var(--warning-color); }
+        .btn-warning:hover { background-color: var(--warning-hover); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 6px; }
+
+        /* 教師專用控制 */
+        .teacher-only { display: none !important; }
+        body.admin-mode .teacher-only { display: inline-block !important; }
+        body.admin-mode div.teacher-only { display: block !important; }
+        body.admin-mode tr.teacher-only, body.admin-mode th.teacher-only, body.admin-mode td.teacher-only { display: table-cell !important; }
+
+        /* 表單完全隔離 */
+        body.admin-mode .form-section.teacher-only {
+            display: none !important;
+        }
+        body.admin-mode .form-section.teacher-only.active {
+            display: block !important;
+        }
+
+        /* 表單區域 */
+        .form-section {
+            background-color: #fbfbfa;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            display: none;
+            animation: formAppear 0.2s ease-out;
+        }
+
+        @keyframes formAppear {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-row-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        /* 模式一：常規表格樣式 */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            animation: viewAppear 0.3s ease-out;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background-color: #f5f6f3; color: var(--primary-color); font-weight: 700; font-size: 14px; user-select: none; }
+        tr:hover { background-color: #fafaf9; }
+
+        .english-container { display: flex; align-items: center; gap: 12px; }
+        .english-word-link { font-weight: 700; text-decoration: none; border-bottom: 1px solid #cbd5e1; padding-bottom: 1px; transition: all 0.2s; }
+        .english-word-link:hover { opacity: 0.8; }
+        
+        /* 表格內特定的英文超連結樣式 */
+        #vocabTable .english-word-link { color: #1e3a24; }
+        #vocabTable .english-word-link:hover { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
+        .btn-speak { background-color: #f1f3f0; color: var(--primary-color); border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+        .btn-speak:hover { background-color: var(--primary-color); color: white; }
+        .count-badge { background-color: #f1f3f0; color: var(--primary-color); padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 13px; border: 1px solid #e2e5e1; }
+
+        /* ==========================================
+           模式二：詞組字卡「全置中極美防歪排版」
+           ========================================== */
+        .similar-grid {
+            display: grid;
+            /* 升級：寬螢幕自適應，每列最小 320px，在大螢幕上自動排列 3 或 4 欄 */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px; /* 拓寬間距 */
+            margin-top: 10px;
+            animation: viewAppear 0.3s ease-out;
+            align-items: stretch; /* 保留網格高度對齊 */
+        }
+
+        /* 外部大卡片 */
+        .similar-card {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* 緊湊對齊 */
+            gap: 16px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        /* 卡片滑過微飄浮效果 */
+        .similar-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(45, 90, 39, 0.08);
+        }
+
+        /* 卡片頂部配色定義 */
+        .similar-card.type-相似字 { border-top: 4px solid var(--primary-color); }
+        .similar-card.type-相似字 .similar-card-title { color: var(--primary-color); }
+        .similar-card.type-相似字 .similar-type-badge { background-color: #eef0eb; color: var(--primary-color); }
+        .similar-card.type-相似字 .english-word-link { color: var(--primary-color); border-bottom-color: #c5d7c0; }
+
+        .similar-card.type-混淆字 { border-top: 4px solid var(--warning-color); }
+        .similar-card.type-混淆字 .similar-card-title { color: var(--warning-color); }
+        .similar-card.type-混淆字 .similar-type-badge { background-color: #fef3c7; color: var(--warning-color); }
+        .similar-card.type-混淆字 .english-word-link { color: var(--warning-color); border-bottom-color: #fde68a; }
+
+        .similar-card.type-關聯字 { border-top: 4px solid var(--accent-color); }
+        .similar-card.type-關聯字 .similar-card-title { color: var(--accent-color); }
+        .similar-card.type-關聯字 .similar-type-badge { background-color: #f3e8ff; color: var(--accent-color); }
+        .similar-card.type-關聯字 .english-word-link { color: var(--accent-color); border-bottom-color: #ddd6fe; }
+
+        /* 卡片標題與操控鈕 (全置中結構) */
+        .similar-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-align: center;
+            letter-spacing: -0.3px;
+            width: 100%;
+        }
+
+        .similar-type-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px; /* 藥丸膠囊外觀 */
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        /* 單字行集合 */
+        .similar-words-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* 置中紙質單字區塊 (Centered Inner word-box) */
+        .similar-word-item {
+            background-color: #faf9f6; /* 溫和紙張黃 */
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center;
+            text-align: center;  
+            gap: 8px;
+            position: relative;
+            transition: all 0.2s;
+            width: 100%; 
+        }
+        .similar-word-item:hover {
+            background-color: #f5f4ef;
+        }
+
+        /* 單字行上層 (英文與中文垂直排列置中) */
+        .similar-row-top {
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .similar-word-left {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .similar-eng-text {
+            font-size: 18px; 
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .similar-translation {
+            font-weight: 700;
+            color: var(--text-color);
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 4px 14px; /* 寬口膠囊樣式 */
+            border-radius: 20px;
+            border: 1px solid #eef0ec;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+        }
+
+        /* 置中備註與聯想提示 */
+        .similar-notes {
+            font-size: 12px;
+            color: var(--text-muted);
+            background-color: transparent;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(0, 0, 0, 0.05);
+            margin-top: 4px;
+            line-height: 1.4;
+            width: 100%;
+            max-width: 280px; 
+            text-align: center;
+        }
+
+        /* 3D 閃卡與彈窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .card-container { background: #fff; padding: 35px; border-radius: 16px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
+        .flashcard-wrapper { perspective: 1000px; margin: 25px auto; width: 100%; height: 170px; cursor: pointer; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .flashcard-wrapper.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; border: 1px dashed #cbd5e1; background-color: #fafaf7; background-image: radial-gradient(#e1e4e6 1px, transparent 0); background-size: 8px 8px; }
+        .flashcard-front { color: var(--primary-color); }
+        .flashcard-back { transform: rotateY(180deg); border-color: var(--primary-color); border-style: solid; }
+        .card-english { font-size: 32px; font-weight: 800; color: #1e3a24; margin-bottom: 8px; }
+        .card-chinese { font-size: 24px; font-weight: 700; color: var(--text-color); margin-bottom: 8px; }
+        .card-notes { font-size: 14px; color: var(--text-muted); }
+
+        .backup-section { margin-top: 25px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
+        #fileInput { display: none; }
+
+        @media (max-width: 600px) {
+            .header-area { flex-direction: column; align-items: flex-start; }
+            .controls { flex-direction: column; align-items: stretch; }
+            th, td { padding: 12px; font-size: 14px; }
+            .form-row-item { grid-template-columns: 1fr; gap: 5px; }
+            .similar-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 頂部標題區 -->
+    <div class="header-area">
+        <h1>📚厚齊的英文單字本</h1>
+        <div class="header-btn-group">
+            <button id="pwBtn" class="teacher-only" onclick="changePassword()" title="修改密碼">⚙️</button>
+            <button id="loginBtn" onclick="handleLoginToggle()" title="管理員登入">🔑</button>
+        </div>
+    </div>
+
+    <!-- 模式切換器 -->
+    <div class="mode-toggle-area">
+        <div id="modeTabNormal" class="mode-tab active" onclick="switchSystemMode('normal')">📘 常規單字本</div>
+        <div id="modeTabSimilar" class="mode-tab" onclick="switchSystemMode('similar')">🔍 相似/混淆字組</div>
+    </div>
+
+    <!-- 學習成就看板 -->
+    <div class="dashboard-area">
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <span class="stat-label">累積日期本</span>
+                <span id="statBooks" class="stat-value">0</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+                <span class="stat-label" id="statWordsLabel">當日單字量</span>
+                <span id="statUniqueWords" class="stat-value">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 統一日期選擇區域 (共用日期筆記本) -->
+    <div class="book-selector-area" id="bookSelectorArea">
+        <label for="bookSelect">📅 選擇課堂日期：</label>
+        <select id="bookSelect" class="book-select" onchange="switchBook()">
+            <!-- 由 JS 動態產生 -->
+        </select>
+        <button class="btn btn-primary btn-sm teacher-only" onclick="createNewBook()">＋ 新增日期</button>
+        <button id="deleteBookBtn" class="btn btn-danger btn-sm teacher-only" onclick="deleteCurrentBook()">🗑️ 刪除日期</button>
+    </div>
+
+    <!-- 功能控制區 -->
+    <div class="controls">
+        <input type="text" id="searchInput" class="search-bar" placeholder="搜尋英文、中文或註記...">
+        <button id="openFormBtn" class="btn btn-success teacher-only" onclick="toggleForm()">＋ 新增字組/單字</button>
+        <button class="btn btn-warning" onclick="openQuiz()">🎯 進入隨機測驗</button>
+        <button class="btn btn-secondary" onclick="toggleTranslation()">隱藏/顯示中文</button>
+    </div>
+
+    <!-- 模式一：常規單字本表單 -->
+    <div id="vocabFormSection" class="form-section teacher-only">
+        <div class="tab-buttons">
+            <button class="tab-btn active" id="tabNormalSingleBtn" onclick="switchTab('single')">單筆新增</button>
+            <button class="tab-btn" id="tabNormalBatchBtn" onclick="switchTab('batch')">批次匯入</button>
+        </div>
+
+        <!-- 單筆新增 -->
+        <div id="tab-single">
+            <h3 id="formTitle" style="margin-top: 0; color: var(--primary-color);">新增單字</h3>
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="englishInput">英文單字</label>
+                    <input type="text" id="englishInput" placeholder="例如: verify">
+                </div>
+                <div class="form-group">
+                    <label for="chineseInput">中文解釋</label>
+                    <input type="text" id="chineseInput" placeholder="例如: 證實、核對">
+                </div>
+                <div class="form-group">
+                    <label for="notesInput">註記欄</label>
+                    <input type="text" id="notesInput" placeholder="例如: 常用於系統驗證">
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
+                <button class="btn btn-primary btn-sm" onclick="saveVocab()">儲存</button>
+            </div>
+        </div>
+
+        <!-- 批次匯入 -->
+        <div id="tab-batch" style="display: none;">
+            <h3 style="margin-top: 0; color: var(--primary-color);">批次匯入常規單字</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：英文,中文,註記 (每行一筆。例：apple,蘋果,甜的)</p>
+            <div class="form-group">
+                <textarea id="batchInput" rows="5" placeholder="banana,香蕉,黃色的&#10;orange,橘子,備註說明"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
+                <button class="btn btn-success btn-sm" onclick="saveBatchVocab()">開始匯入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模式二：相似字群組表單 -->
+    <div id="similarFormSection" class="form-section teacher-only">
+        <div class="tab-buttons">
+            <button class="tab-btn active" id="tabSimilarSingleBtn" onclick="switchSimilarTab('single')">單筆字組</button>
+            <button class="tab-btn" id="tabSimilarBatchBtn" onclick="switchSimilarTab('batch')">批次字組</button>
+        </div>
+
+        <!-- 單筆字組新增 -->
+        <div id="tab-similar-single">
+            <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">新增相似字對比群組</h3>
+            <input type="hidden" id="editSimilarIndex" value="-1">
+            
+            <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label for="groupTypeSelect">字組類型</label>
+                    <select id="groupTypeSelect" class="book-select" style="min-width: unset; width: 100%;">
+                        <option value="相似字">相似字</option>
+                        <option value="混淆字">混淆字</option>
+                        <option value="關聯字">關聯字</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="groupTitleInput">群組主題 / 概念說明</label>
+                    <input type="text" id="groupTitleInput" placeholder="例如: 機器與裝置的大小對比" style="width: 100%; box-sizing: border-box;">
+                </div>
+            </div>
+            
+            <div id="groupWordsInputs">
+                <!-- 動態產生單字列 -->
+            </div>
+            
+            <button class="btn btn-sm btn-secondary" onclick="addWordRowToForm()" style="margin-top: 10px;">＋ 增加單字對比列</button>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
+                <button class="btn btn-primary btn-sm" style="background-color: var(--accent-color);" onclick="saveSimilarGroup()">儲存群組</button>
+            </div>
+        </div>
+
+        <!-- 批次字組匯入 -->
+        <div id="tab-similar-batch" style="display: none;">
+            <h3 style="margin-top: 0; color: var(--accent-color);">批次匯入對比字組</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：用 # [類型] | 標題 開頭，下方列出對比字組 (類型支援：相似字、混淆字、關聯字)</p>
+            <div class="form-group">
+                <textarea id="batchSimilarInput" rows="8" placeholder="# 混淆字 | direction & orientation&#10;direction,方位（向）,指物理方向&#10;orientation,取向；新生訓練,指概念導向&#10;&#10;# 相似字 | 機器大小對比&#10;device,小裝置,可攜式裝置&#10;machine,大機器,大型引擎機具"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
+                <button class="btn btn-success btn-sm" style="background-color: var(--accent-color);" onclick="saveBatchSimilarGroups()">開始匯入字組</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模式一：常規表格 -->
+    <div class="table-container" id="normalTableContainer">
+        <table id="vocabTable">
+            <thead id="vocabHeader"></thead>
+            <tbody id="vocabList"></tbody>
+        </table>
+    </div>
+
+    <!-- 模式二：相似字卡片排版 -->
+    <div id="similarGridContainer" class="similar-grid" style="display: none;">
+        <!-- 由 JS 動態生成卡片 -->
+    </div>
+
+    <!-- 資料備份區域 -->
+    <div class="backup-section teacher-only">
+        <button class="btn btn-secondary btn-sm" onclick="exportData()">匯出完整資料備份 (JSON)</button>
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fileInput').click()">匯入資料備份</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
+    </div>
+</div>
+
+<!-- 隨機測驗 (Modal) -->
+<div id="quizModal" class="modal">
+    <div class="card-container">
+        <h2 style="margin-top: 0; color: var(--primary-color);" id="quizModalTitle">🎯 隨機抽卡測驗</h2>
+        <p style="font-size: 13px; color: var(--text-muted);">點擊卡片可進行「3D 翻牌」查看答案</p>
+        
+        <div class="flashcard-wrapper" id="flashcardWrapper" onclick="flipCard()">
+            <div class="flashcard-inner">
+                <div class="flashcard-front">
+                    <div id="cardEnglish" class="card-english">verify</div>
+                    <span style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">TOUCH TO FLIP</span>
+                </div>
+                <div class="flashcard-back">
+                    <div id="cardChinese" class="card-chinese">-</div>
+                    <div id="cardNotes" class="card-notes">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+            <button class="btn btn-secondary" onclick="closeQuiz()">關閉</button>
+            <button class="btn btn-primary" onclick="speakCurrentQuiz()">🔊 發音</button>
+            <button class="btn btn-success" onclick="nextQuiz()">下一題</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 預設一體化學習本示範資料
+    const defaultUnifiedBooks = [
+        {
+            id: "book-8-7",
+            name: "8/7 課堂學習本",
+            words: [
+                { english: 'verify', chinese: '證實、核對', notes: '常用於系統驗證' },
+                { english: 'diligent', chinese: '勤奮的', notes: '形容詞，形容學習認真' }
+            ],
+            similarGroups: [
+                {
+                    id: "group-1",
+                    type: "相似字",
+                    title: "休閒與娛樂辨析",
+                    words: [
+                        { english: "recreation", chinese: "娛樂、消遣", notes: "概念較抽象" },
+                        { english: "entertain", chinese: "招待、使歡樂", notes: "帶有動態演出的消遣" },
+                        { english: "leisure", chinese: "閒暇、空閒", notes: "指無憂無慮的時間" }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "book-8-9",
+            name: "8/9 課堂學習本",
+            words: [
+                { english: 'implement', chinese: '實施、執行', notes: '專案常用開發術語' }
+            ],
+            similarGroups: [
+                {
+                    id: "group-2",
+                    type: "混淆字",
+                    title: "裝置與機器大小對比",
+                    words: [
+                        { english: "device", chinese: "(小)裝置", notes: "如手機、手錶" },
+                        { english: "machine", chinese: "(大)機器", notes: "指具備引擎的大型機具" }
+                    ]
+                }
+            ]
+        }
+    ];
+
+    let bookList = [];      
+    let systemMode = "normal"; 
+    let currentBookId = "";    
+    let isAdmin = false;
+
+    let currentSortColumn = 'english'; 
+    let isSortAsc = true;           
+
+    window.onload = function() {
+        // 1. 初始化密碼
+        const currentPasswordInStorage = localStorage.getItem('adminPassword');
+        if (!currentPasswordInStorage || currentPasswordInStorage === 'teacher123') {
+            localStorage.setItem('adminPassword', '970126'); 
+        }
+
+        // 2. 自動升級與合併舊資料
+        const storedUnified = localStorage.getItem('myVocabBooks_v7_unified');
+        if (storedUnified) {
+            bookList = JSON.parse(storedUnified);
+        } else {
+            const v6Data = localStorage.getItem('myVocabBooks_v6');
+            const simData = localStorage.getItem('myVocabSimilarBooks_v1');
+            
+            if (v6Data || simData) {
+                const v6List = v6Data ? JSON.parse(v6Data) : [];
+                const simList = simData ? JSON.parse(simData) : [];
+                const booksMap = {};
+
+                v6List.forEach(b => {
+                    booksMap[b.name] = { id: b.id, name: b.name, words: b.words || [], similarGroups: [] };
+                });
+
+                simList.forEach(sb => {
+                    if (booksMap[sb.name]) {
+                        const upgradedGroups = (sb.groups || []).map(g => {
+                            return { ...g, type: g.type || "相似字" };
+                        });
+                        booksMap[sb.name].similarGroups = upgradedGroups;
+                    } else {
+                        const upgradedGroups = (sb.groups || []).map(g => {
+                            return { ...g, type: g.type || "相似字" };
+                        });
+                        booksMap[sb.name] = { id: sb.id, name: sb.name, words: [], similarGroups: upgradedGroups };
+                    }
+                });
+                bookList = Object.values(booksMap);
+            } else {
+                bookList = defaultUnifiedBooks;
+            }
+            saveToLocalStorage();
+        }
+
+        if (bookList.length > 0) {
+            currentBookId = bookList[0].id;
+        } else {
+            const id = "book-" + Date.now();
+            bookList.push({ id: id, name: "新學習本", words: [], similarGroups: [] });
+            currentBookId = id;
+            saveToLocalStorage();
+        }
+
+        updateBookDropdown();
+        renderActiveMode();
+    };
+
+    function saveToLocalStorage() {
+        localStorage.setItem('myVocabBooks_v7_unified', JSON.stringify(bookList));
+        updateStats();
+    }
+
+    // 模式切換
+    function switchSystemMode(mode) {
+        systemMode = mode;
+        document.getElementById('modeTabNormal').classList.remove('active');
+        document.getElementById('modeTabSimilar').classList.remove('active');
+        
+        document.getElementById('normalTableContainer').style.display = 'none';
+        document.getElementById('similarGridContainer').style.display = 'none';
+
+        toggleForm(false); 
+
+        if (mode === 'normal') {
+            document.getElementById('modeTabNormal').classList.add('active');
+            document.getElementById('normalTableContainer').style.display = 'block';
+        } else {
+            document.getElementById('modeTabSimilar').classList.add('active');
+            document.getElementById('similarGridContainer').style.display = 'grid';
+        }
+
+        updateBookDropdown(); 
+        renderActiveMode();
+    }
+
+    function renderActiveMode() {
+        const filterVal = document.getElementById('searchInput').value;
+        if (systemMode === 'normal') {
+            renderTable(filterVal);
+        } else {
+            renderSimilarTable(filterVal);
+        }
+        updateStats();
+    }
+
+    // ==========================================
+    // 智慧型指標狀態動態切換計算 (當日單字量 vs 總單字量)
+    // ==========================================
+    function updateStats() {
+        document.getElementById('statBooks').innerText = bookList.length;
+
+        const statLabel = document.getElementById('statWordsLabel');
+        const statValue = document.getElementById('statUniqueWords');
+
+        if (systemMode === 'normal') {
+            // 常規單字本模式
+            if (currentBookId === "all-books-review") {
+                statLabel.innerText = "總單字量";
+                statValue.innerText = getAggregatedWords().length; // 跨模式去重總字彙量
+            } else {
+                statLabel.innerText = "當日單字量";
+                statValue.innerText = getCurrentWords().length;    // 精準當日 Mode 1 單字量
+            }
+        } else {
+            // 相似字本模式 (同步切換當日/總體指標)
+            if (currentBookId === "all-books-review") {
+                statLabel.innerText = "總字組數";
+                let totalGroups = 0;
+                bookList.forEach(b => totalGroups += (b.similarGroups || []).length);
+                statValue.innerText = totalGroups;
+            } else {
+                statLabel.innerText = "當日字組數";
+                const book = bookList.find(b => b.id === currentBookId);
+                statValue.innerText = book ? (book.similarGroups || []).length : 0;
+            }
+        }
+    }
+
+    function updateBookDropdown() {
+        const select = document.getElementById('bookSelect');
+        select.innerHTML = '';
+        bookList.forEach(book => {
+            const opt = document.createElement('option');
+            opt.value = book.id; opt.innerText = book.name;
+            if (book.id === currentBookId) opt.selected = true;
+            select.appendChild(opt);
+        });
+
+        const allOpt = document.createElement('option');
+        allOpt.value = "all-books-review"; 
+        allOpt.innerText = systemMode === 'normal' ? "📊 所有單字一覽 (自動累計次數)" : "📊 所有相似字組一覽";
+        if (currentBookId === "all-books-review") allOpt.selected = true;
+        select.appendChild(allOpt);
+
+        const deleteBtn = document.getElementById('deleteBookBtn');
+        const openFormBtn = document.getElementById('openFormBtn');
+        if (currentBookId === "all-books-review") {
+            if (deleteBtn) deleteBtn.style.display = "none";
+            if (openFormBtn) openFormBtn.style.display = "none";
+        } else {
+            if (deleteBtn && isAdmin) deleteBtn.style.display = "inline-block";
+            if (openFormBtn && isAdmin) openFormBtn.style.display = "inline-block";
+        }
+    }
+
+    function switchBook() {
+        currentBookId = document.getElementById('bookSelect').value;
+        if (currentBookId === "all-books-review") {
+            currentSortColumn = (systemMode === 'normal') ? 'count' : 'english'; 
+            isSortAsc = false;
+        } else {
+            currentSortColumn = 'english'; isSortAsc = true;
+        }
+        updateBookDropdown();
+        triggerTableLoadAnimation();
+        renderActiveMode();
+    }
+
+    function triggerTableLoadAnimation() {
+        const el = systemMode === 'normal' ? document.getElementById('normalTableContainer') : document.getElementById('similarGridContainer');
+        if (el) {
+            el.style.animation = 'none';
+            el.offsetHeight; 
+            el.style.animation = null;
+        }
+    }
+
+    function createNewBook() {
+        if (!isAdmin) return;
+        const name = prompt("請輸入新的學習日期或主題名稱 (如: 8/14 課堂)：");
+        if (name && name.trim() !== "") {
+            const id = "book-" + Date.now();
+            bookList.push({ id: id, name: name.trim(), words: [], similarGroups: [] });
+            currentBookId = id;
+            saveToLocalStorage();
+            updateBookDropdown();
+            renderActiveMode();
+        }
+    }
+
+    function deleteCurrentBook() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+        if (confirm(`確定要永久刪除「${book.name}」及其內的所有單字與相似字嗎？`)) {
+            bookList = bookList.filter(b => b.id !== currentBookId);
+            currentBookId = bookList.length > 0 ? bookList[0].id : "";
+            saveToLocalStorage(); updateBookDropdown(); renderActiveMode();
+        }
+    }
+
+    // ==========================================
+    // 模式一：一覽整合統計邏輯 (每日精準去重、防止重複累計)
+    // ==========================================
+    function getAggregatedWords() {
+        const map = {};
+        
+        bookList.forEach(book => {
+            const seenThisDay = new Set();
+            const tempWordsData = {}; 
+            
+            // 1. 處理第一部分 (常規單字)
+            (book.words || []).forEach(word => {
+                const wordRaw = word.english.trim();
+                const key = wordRaw.toLowerCase();
+                seenThisDay.add(key);
+                
+                if (!tempWordsData[key]) {
+                    tempWordsData[key] = {
+                        english: wordRaw,
+                        chineseList: [word.chinese.trim()],
+                        notesList: word.notes ? [word.notes.trim()] : []
+                    };
+                } else {
+                    if (!tempWordsData[key].chineseList.includes(word.chinese.trim())) {
+                        tempWordsData[key].chineseList.push(word.chinese.trim());
+                    }
+                    if (word.notes && !tempWordsData[key].notesList.includes(word.notes.trim())) {
+                        tempWordsData[key].notesList.push(word.notes.trim());
+                    }
+                }
+            });
+
+            // 2. 處理第二部分 (相似/混淆/關聯字組)
+            (book.similarGroups || []).forEach(group => {
+                (group.words || []).forEach(word => {
+                    const wordRaw = word.english.trim();
+                    const key = wordRaw.toLowerCase();
+                    seenThisDay.add(key);
+
+                    const sourceTag = `[${group.type || '相似字'}: ${group.title}]${word.notes ? ' ' + word.notes.trim() : ''}`;
+                    
+                    if (!tempWordsData[key]) {
+                        tempWordsData[key] = {
+                            english: wordRaw,
+                            chineseList: [word.chinese.trim()],
+                            notesList: [sourceTag]
+                        };
+                    } else {
+                        if (!tempWordsData[key].chineseList.includes(word.chinese.trim())) {
+                            tempWordsData[key].chineseList.push(word.chinese.trim());
+                        }
+                        if (!tempWordsData[key].notesList.includes(sourceTag)) {
+                            tempWordsData[key].notesList.push(sourceTag);
+                        }
+                    }
+                });
+            });
+
+            // 3. 每日去重累加：同單字在同天不論在哪個本出現，至多累加 1 次出現天數
+            seenThisDay.forEach(key => {
+                const dayData = tempWordsData[key];
+                if (!map[key]) {
+                    map[key] = {
+                        english: dayData.english,
+                        chineseList: [...dayData.chineseList],
+                        notesList: [...dayData.notesList],
+                        count: 1
+                    };
+                } else {
+                    map[key].count += 1; 
+                    dayData.chineseList.forEach(chi => {
+                        if (!map[key].chineseList.includes(chi)) map[key].chineseList.push(chi);
+                    });
+                    dayData.notesList.forEach(not => {
+                        if (!map[key].notesList.includes(not)) map[key].notesList.push(not);
+                    });
+                }
+            });
+        });
+
+        return Object.values(map).map(item => ({ 
+            count: item.count, 
+            english: item.english, 
+            chinese: item.chineseList.join(' / '), 
+            notes: item.notesList.join('; ') 
+        }));
+    }
+
+    // 獲取當前單字
+    function getCurrentWords() {
+        if (currentBookId === "all-books-review") return getAggregatedWords();
+        const book = bookList.find(b => b.id === currentBookId);
+        return book ? (book.words || []) : [];
+    }
+
+    function renderTableHeader() {
+        const header = document.getElementById('vocabHeader');
+        const countArrow = currentSortColumn === 'count' ? (isSortAsc ? '▲' : '▼') : '';
+        const englishArrow = currentSortColumn === 'english' ? (isSortAsc ? '▲' : '▼') : '';
+
+        if (currentBookId === "all-books-review") {
+            header.innerHTML = `<tr><th onclick="handleSort('count')" style="width: 15%;">出現天數 ${countArrow}</th><th onclick="handleSort('english')" style="width: 30%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th></tr>`;
+        } else {
+            const opHeader = isAdmin ? `<th style="width: 15%;">操作</th>` : '';
+            header.innerHTML = `<tr><th onclick="handleSort('english')" style="width: 35%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th>${opHeader}</tr>`;
+        }
+    }
+
+    function renderTable(filterText = '') {
+        renderTableHeader();
+        const tbody = document.getElementById('vocabList');
+        tbody.innerHTML = '';
+        const currentWords = getCurrentWords();
+
+        // 智慧型原索引用戶綁定
+        let displayList = currentWords.map((item, index) => {
+            return { ...item, originalIndex: index };
+        });
+
+        displayList.sort((a, b) => {
+            let valA = a[currentSortColumn] || 0;
+            let valB = b[currentSortColumn] || 0;
+            return typeof valA === 'string' ? (isSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA)) : (isSortAsc ? valA - valB : valB - valA);
+        });
+
+        displayList.forEach((item) => {
+            if (filterText) {
+                const searchLower = filterText.toLowerCase();
+                if (!item.english.toLowerCase().includes(searchLower) && !item.chinese.toLowerCase().includes(searchLower)) return;
+            }
+            const tr = document.createElement('tr');
+            const targetWord = item.english.trim().toLowerCase();
+            const dictionaryUrl = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${encodeURIComponent(targetWord)}`;
+            const englishHTML = `<div class="english-container"><a href="${dictionaryUrl}" target="_blank" class="english-word-link">${escapeHTML(item.english)}</a><button class="btn-speak" onclick="speak('${escapeJS(item.english)}')">🔊</button></div>`;
+
+            if (currentBookId === "all-books-review") {
+                tr.innerHTML = `<td style="text-align: center;"><span class="count-badge">${item.count} 天</span></td><td>${englishHTML}</td><td class="chinese-cell">${escapeHTML(item.chinese)}</td><td>${escapeHTML(item.notes || '')}</td>`;
+            } else {
+                let actionsHTML = '';
+                if (isAdmin) {
+                    actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVocab(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
+                }
+                tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell">${escapeHTML(item.chinese)}</td><td>${escapeHTML(item.notes || '')}</td>${actionsHTML}`;
+            }
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ==========================================
+    // 模式二：相似/混淆字處理 (防歪斜完全置中渲染)
+    // ==========================================
+    function getAggregatedSimilarGroups() {
+        let allGroups = [];
+        bookList.forEach(b => {
+            allGroups = allGroups.concat(b.similarGroups || []);
+        });
+        return allGroups;
+    }
+
+    function getCurrentSimilarGroups() {
+        if (currentBookId === "all-books-review") return getAggregatedSimilarGroups();
+        const book = bookList.find(b => b.id === currentBookId);
+        return book ? (book.similarGroups || []) : [];
+    }
+
+    function renderSimilarTable(filterText = '') {
+        const container = document.getElementById('similarGridContainer');
+        container.innerHTML = '';
+
+        const currentGroups = getCurrentSimilarGroups();
+
+        let displayGroups = currentGroups.map((g, index) => {
+            return { ...g, originalIndex: index };
+        });
+
+        displayGroups.forEach((group) => {
+            if (filterText) {
+                const searchLower = filterText.toLowerCase();
+                const hasMatch = group.title.toLowerCase().includes(searchLower) || 
+                                 group.words.some(w => w.english.toLowerCase().includes(searchLower) || w.chinese.toLowerCase().includes(searchLower));
+                if (!hasMatch) return;
+            }
+
+            const groupType = group.type || "相似字"; 
+            const card = document.createElement('div');
+            card.className = `similar-card type-${groupType}`; 
+
+            let adminControls = '';
+            if (isAdmin && currentBookId !== "all-books-review") {
+                adminControls = `
+                    <div style="display: flex; gap: 4px; justify-content: center; margin-top: 6px;">
+                        <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size:11px;" onclick="editSimilarGroup(${group.originalIndex})">改</button>
+                        <button class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size:11px;" onclick="deleteSimilarGroup(${group.originalIndex})">刪</button>
+                    </div>
+                `;
+            } else if (isAdmin && currentBookId === "all-books-review") {
+                adminControls = `<div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">一覽唯讀</div>`;
+            }
+
+            let wordListHTML = '';
+            group.words.forEach(w => {
+                const targetWord = w.english.trim().toLowerCase();
+                const dictionaryUrl = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${encodeURIComponent(targetWord)}`;
+                
+                wordListHTML += `
+                    <div class="similar-word-item">
+                        <div class="similar-row-top">
+                            <div class="similar-word-left">
+                                <a href="${dictionaryUrl}" target="_blank" class="english-word-link similar-eng-text">${escapeHTML(w.english)}</a>
+                                <button class="btn-speak" onclick="speak('${escapeJS(w.english)}')">🔊</button>
+                            </div>
+                            <div class="similar-translation">${escapeHTML(w.chinese)}</div>
+                        </div>
+                        ${w.notes ? `<div class="similar-notes">💡 ${escapeHTML(w.notes)}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="similar-card-title">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; width: 100%;">
+                        <span class="similar-type-badge">${groupType}</span>
+                        <span style="font-size: 16px; font-weight: 700;">${escapeHTML(group.title)}</span>
+                    </div>
+                    ${adminControls}
+                </div>
+                <div class="similar-words-list">
+                    ${wordListHTML}
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function addWordRowToForm(english = '', chinese = '', notes = '') {
+        const container = document.getElementById('groupWordsInputs');
+        const rowId = "row-" + Date.now() + Math.random().toString(36).substr(2, 5);
+
+        const row = document.createElement('div');
+        row.className = 'form-row-item';
+        row.id = rowId;
+        row.innerHTML = `
+            <input type="text" class="group-eng-input" placeholder="單字 (如: device)" value="${escapeHTML(english)}">
+            <input type="text" class="group-chi-input" placeholder="對比翻譯 (如: 小裝置)" value="${escapeHTML(chinese)}">
+            <input type="text" class="group-not-input" placeholder="補充分析/字根" value="${escapeHTML(notes)}">
+            <button class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove()" style="padding: 6px 10px;">❌</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function saveSimilarGroup() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const type = document.getElementById('groupTypeSelect').value;
+        const title = document.getElementById('groupTitleInput').value.trim();
+        const editIndex = parseInt(document.getElementById('editSimilarIndex').value);
+
+        if (!title) {
+            alert("請輸入群組主題！");
+            return;
+        }
+
+        const words = [];
+        const rows = document.querySelectorAll('.form-row-item');
+        rows.forEach(row => {
+            const eng = row.querySelector('.group-eng-input').value.trim();
+            const chi = row.querySelector('.group-chi-input').value.trim();
+            const not = row.querySelector('.group-not-input').value.trim();
+            if (eng && chi) {
+                words.push({ english: eng, chinese: chi, notes: not });
+            }
+        });
+
+        if (words.length < 1) {
+            alert("請至少填入一組完整的單字與對比翻譯！");
+            return;
+        }
+
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        const groupData = { id: "group-" + Date.now(), type, title, words };
+
+        if (editIndex === -1) {
+            if(!book.similarGroups) book.similarGroups = [];
+            book.similarGroups.push(groupData);
+        } else {
+            book.similarGroups[editIndex] = groupData;
+        }
+
+        saveToLocalStorage();
+        renderSimilarTable();
+        clearSimilarForm();
+        toggleForm(false);
+    }
+
+    function editSimilarGroup(index) {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        switchSimilarTab('single'); 
+        const group = book.similarGroups[index];
+        document.getElementById('groupTypeSelect').value = group.type || "相似字";
+        document.getElementById('groupTitleInput').value = group.title;
+        document.getElementById('editSimilarIndex').value = index;
+
+        document.getElementById('groupWordsInputs').innerHTML = '';
+        group.words.forEach(w => {
+            addWordRowToForm(w.english, w.chinese, w.notes);
+        });
+
+        document.getElementById('similarFormTitle').innerText = '編輯相似字對比群組';
+        toggleForm(true); 
+    }
+
+    function deleteSimilarGroup(index) {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        if (confirm('確定要永久刪除此對比群組嗎？')) {
+            book.similarGroups.splice(index, 1);
+            saveToLocalStorage();
+            renderSimilarTable();
+        }
+    }
+
+    function saveBatchSimilarGroups() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const rawText = document.getElementById('batchSimilarInput').value.trim();
+        if (!rawText) {
+            alert('請輸入要批次匯入的對比字組內容！');
+            return;
+        }
+
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        const lines = rawText.split('\n');
+        let currentGroup = null;
+        let groupCount = 0;
+        let wordCount = 0;
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+
+            if (trimmed.startsWith('#')) {
+                if (currentGroup && currentGroup.words.length > 0) {
+                    if (!book.similarGroups) book.similarGroups = [];
+                    book.similarGroups.push(currentGroup);
+                    groupCount++;
+                }
+
+                const headerContent = trimmed.replace(/^#\s*/, '');
+                let type = "相似字"; 
+                let title = headerContent;
+
+                const match = headerContent.match(/^(相似字|混淆字|關聯字)\s*[|:：\-]\s*(.*)$/);
+                if (match) {
+                    type = match[1];
+                    title = match[2];
+                } else {
+                    if (headerContent.includes("混淆") || headerContent.includes("易混")) type = "混淆字";
+                    else if (headerContent.includes("關聯") || headerContent.includes("主題")) type = "關聯字";
+                }
+
+                currentGroup = {
+                    id: "group-" + Date.now() + Math.random().toString(36).substr(2, 5),
+                    type: type,
+                    title: title,
+                    words: []
+                };
+            } else if (currentGroup) {
+                const parts = trimmed.split(',');
+                if (parts.length >= 2) {
+                    const english = parts[0].trim();
+                    const chinese = parts[1].trim();
+                    const notes = parts[2] ? parts[2].trim() : '';
+                    if (english && chinese) {
+                        currentGroup.words.push({ english, chinese, notes });
+                        wordCount++;
+                    }
+                }
+            }
+        });
+
+        if (currentGroup && currentGroup.words.length > 0) {
+            if (!book.similarGroups) book.similarGroups = [];
+            book.similarGroups.push(currentGroup);
+            groupCount++;
+        }
+
+        if (groupCount === 0) {
+            alert('未成功解析出任何字組，請檢查格式是否包含以 # 開頭的標題！');
+            return;
+        }
+
+        saveToLocalStorage();
+        renderSimilarTable();
+        document.getElementById('batchSimilarInput').value = '';
+        toggleForm(false);
+        alert(`成功新增 ${groupCount} 組對比字組 (共計 ${wordCount} 個單字) 至「${book.name}」！`);
+    }
+
+    function saveBatchVocab() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const rawText = document.getElementById('batchInput').value.trim();
+        if (!rawText) {
+            alert('請輸入要批次匯入的常規單字！');
+            return;
+        }
+
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        const lines = rawText.split('\n');
+        let count = 0;
+
+        lines.forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+
+            const parts = trimmed.split(',');
+            if (parts.length >= 2) {
+                const english = parts[0].trim();
+                const chinese = parts[1].trim();
+                const notes = parts[2] ? parts[2].trim() : '';
+                if (english && chinese) {
+                    book.words.push({ english, chinese, notes });
+                    count++;
+                }
+            }
+        });
+
+        if (count === 0) {
+            alert('沒有成功解析任何單字，請檢查格式。');
+            return;
+        }
+
+        saveToLocalStorage();
+        renderTable();
+        document.getElementById('batchInput').value = '';
+        toggleForm(false);
+        alert(`成功匯入 ${count} 個單字至「${book.name}」！`);
+    }
+
+    function saveVocab() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const english = document.getElementById('englishInput').value.trim();
+        const chinese = document.getElementById('chineseInput').value.trim();
+        const notes = document.getElementById('notesInput').value.trim();
+        const editIndex = parseInt(document.getElementById('editIndex').value);
+
+        if (!english || !chinese) {
+            alert('請完整填寫英文與中文');
+            return;
+        }
+
+        const data = { english, chinese, notes };
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        if (editIndex === -1) {
+            book.words.push(data);
+        } else {
+            book.words[editIndex] = data; 
+        }
+
+        saveToLocalStorage();
+        renderTable();
+        clearForm();
+        toggleForm(false);
+    }
+
+    function editVocab(index) {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        switchTab('single'); 
+        const item = book.words[index];
+        document.getElementById('englishInput').value = item.english;
+        document.getElementById('chineseInput').value = item.chinese;
+        document.getElementById('notesInput').value = item.notes || '';
+        document.getElementById('editIndex').value = index;
+        
+        document.getElementById('formTitle').innerText = '編輯資料';
+        toggleForm(true); 
+    }
+
+    function deleteVocab(index) {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+
+        if (confirm('確定要刪除這筆資料嗎？')) {
+            book.words.splice(index, 1);
+            saveToLocalStorage();
+            renderTable();
+        }
+    }
+
+    function toggleForm(show) {
+        const normForm = document.getElementById('vocabFormSection');
+        const simForm = document.getElementById('similarFormSection');
+
+        const isNormActive = normForm.classList.contains('active');
+        const isSimActive = simForm.classList.contains('active');
+
+        normForm.classList.remove('active');
+        simForm.classList.remove('active');
+
+        if (show === false) {
+            return; 
+        }
+
+        if (systemMode === 'normal') {
+            if (show === true) {
+                normForm.classList.add('active');
+            } else {
+                if (!isNormActive) {
+                    clearForm(); 
+                    normForm.classList.add('active');
+                }
+            }
+        } else {
+            if (show === true) {
+                simForm.classList.add('active');
+            } else {
+                if (!isSimActive) {
+                    clearSimilarForm(); 
+                    simForm.classList.add('active');
+                }
+            }
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('englishInput').value = '';
+        document.getElementById('chineseInput').value = '';
+        document.getElementById('notesInput').value = '';
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('formTitle').innerText = '新增單字';
+    }
+
+    function clearSimilarForm() {
+        document.getElementById('groupTitleInput').value = '';
+        document.getElementById('groupWordsInputs').innerHTML = '';
+        document.getElementById('batchSimilarInput').value = '';
+        document.getElementById('editSimilarIndex').value = '-1';
+        document.getElementById('groupTypeSelect').value = '相似字';
+        document.getElementById('similarFormTitle').innerText = '新增相似字對比群組';
+        
+        addWordRowToForm(); addWordRowToForm();
+        switchSimilarTab('single'); 
+    }
+
+    function switchTab(tabName) {
+        document.getElementById('tab-single').style.display = 'none';
+        document.getElementById('tab-batch').style.display = 'none';
+        document.getElementById('tabNormalSingleBtn').classList.remove('active');
+        document.getElementById('tabNormalBatchBtn').classList.remove('active');
+
+        if (tabName === 'single') {
+            document.getElementById('tab-single').style.display = 'block';
+            document.getElementById('tabNormalSingleBtn').classList.add('active');
+        } else {
+            document.getElementById('tab-batch').style.display = 'block';
+            document.getElementById('tabNormalBatchBtn').classList.add('active');
+        }
+    }
+
+    function switchSimilarTab(tabName) {
+        document.getElementById('tab-similar-single').style.display = 'none';
+        document.getElementById('tab-similar-batch').style.display = 'none';
+        document.getElementById('tabSimilarSingleBtn').classList.remove('active');
+        document.getElementById('tabSimilarBatchBtn').classList.remove('active');
+
+        if (tabName === 'single') {
+            document.getElementById('tab-similar-single').style.display = 'block';
+            document.getElementById('tabSimilarSingleBtn').classList.add('active');
+        } else {
+            document.getElementById('tab-similar-batch').style.display = 'block';
+            document.getElementById('tabSimilarBatchBtn').classList.add('active');
+        }
+    }
+
+    function handleSort(column) {
+        if (currentSortColumn === column) {
+            isSortAsc = !isSortAsc; 
+        } else {
+            currentSortColumn = column;
+            isSortAsc = true;
+        }
+        renderTable(document.getElementById('searchInput').value);
+    }
+
+    function handleLoginToggle() {
+        const loginBtn = document.getElementById('loginBtn');
+        if (!isAdmin) {
+            const correctPassword = localStorage.getItem('adminPassword');
+            const passwordInput = prompt("請輸入管理員密碼：");
+            if (passwordInput === correctPassword) {
+                isAdmin = true;
+                document.body.classList.add('admin-mode');
+                loginBtn.innerText = "🔒"; loginBtn.title = "退出管理員模式";
+                updateBookDropdown();
+                renderActiveMode();
+            } else if (passwordInput !== null) {
+                alert("密碼錯誤！");
+            }
+        } else {
+            isAdmin = false;
+            document.body.classList.remove('admin-mode');
+            loginBtn.innerText = "🔑"; loginBtn.title = "管理員登入";
+            toggleForm(false);
+            updateBookDropdown();
+            renderActiveMode();
+        }
+    }
+
+    function changePassword() {
+        if (!isAdmin) return;
+        const currentPwd = localStorage.getItem('adminPassword');
+        const oldPwd = prompt("請輸入舊密碼：");
+        if (oldPwd === currentPwd) {
+            const newPwd = prompt("請輸入新密碼：");
+            if (newPwd && newPwd.trim() !== "") {
+                localStorage.setItem('adminPassword', newPwd.trim());
+                alert("密碼更新成功！");
+            }
+        } else if (oldPwd !== null) {
+            alert("密碼確認失敗。");
+        }
+    }
+
+    let currentQuizWord = null;
+    let activeQuizPool = [];
+
+    function openQuiz() {
+        if (systemMode === 'normal') {
+            activeQuizPool = getCurrentWords();
+            document.getElementById('quizModalTitle').innerText = "🎯 常規單字隨機測驗";
+        } else {
+            activeQuizPool = [];
+            const currentGroups = getCurrentSimilarGroups();
+            currentGroups.forEach(g => {
+                g.words.forEach(w => activeQuizPool.push({ ...w, notes: `[來自群組: ${g.title}] ${w.notes || ''}` }));
+            });
+            document.getElementById('quizModalTitle').innerText = "🎯 相似字混合隨機測驗";
+        }
+
+        if (activeQuizPool.length === 0) {
+            alert("當前範圍內沒有單字可供測驗。");
+            return;
+        }
+        document.getElementById('quizModal').classList.add('active');
+        nextQuiz();
+    }
+
+    function closeQuiz() { document.getElementById('quizModal').classList.remove('active'); }
+    function flipCard() { document.getElementById('flashcardWrapper').classList.toggle('flipped'); }
+
+    function nextQuiz() {
+        if (activeQuizPool.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * activeQuizPool.length);
+        currentQuizWord = activeQuizPool[randomIndex];
+
+        document.getElementById('flashcardWrapper').classList.remove('flipped');
+        setTimeout(() => {
+            document.getElementById('cardEnglish').innerText = currentQuizWord.english;
+            document.getElementById('cardChinese').innerText = currentQuizWord.chinese;
+            document.getElementById('cardNotes').innerText = currentQuizWord.notes || "(無備註)";
+        }, 150);
+    }
+
+    function speakCurrentQuiz() { if (currentQuizWord) speak(currentQuizWord.english); }
+
+    function toggleTranslation() {
+        const table = document.getElementById('vocabTable');
+        const grid = document.getElementById('similarGridContainer');
+        table.classList.toggle('hide-translation');
+        grid.classList.toggle('hide-translation');
+    }
+
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        if (systemMode === 'normal') {
+            renderTable(e.target.value);
+        } else {
+            renderSimilarTable(e.target.value);
+        }
+    });
+
+    function exportData() {
+        if (!isAdmin) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(bookList, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "all_vocab_system_backup.json");
+        document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
+    }
+
+    function importData(event) {
+        if (!isAdmin) return;
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported) && imported.length > 0 && imported[0].hasOwnProperty('words')) {
+                    if (confirm('匯入將會完整覆蓋目前所有日期單字與相似字，確定覆蓋嗎？')) {
+                        bookList = imported;
+                        if (bookList.length > 0) currentBookId = bookList[0].id;
+                        saveToLocalStorage();
+                        updateBookDropdown();
+                        renderActiveMode();
+                        alert('整合系統資料還原成功！');
+                    }
+                } else {
+                    alert('資料格式不正確，需為整合型備份檔案。');
+                }
+            } catch (err) { alert('檔案解析失敗。'); }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function escapeJS(str) {
+        return str.replace(/'/g, "\\'");
+    }
+</script>
+
+</body>
+</html>
