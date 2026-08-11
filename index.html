@@ -35,14 +35,14 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 20px; /* 大螢幕縮減外邊距以保留最大顯示區域 */
+            padding: 20px; 
             min-height: 100vh;
             display: flex;
             align-items: center;
         }
 
         .container {
-            max-width: 1400px; /* 升級：寬螢幕滿版體驗，最大寬度擴展至 1400px */
+            max-width: 1400px; /* 寬螢幕滿版體驗 */
             width: 100%;
             margin: 0 auto;
             background-color: var(--container-bg);
@@ -344,9 +344,8 @@
            ========================================== */
         .similar-grid {
             display: grid;
-            /* 升級：寬螢幕自適應，每列最小 320px，在大螢幕上自動排列 3 或 4 欄 */
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px; /* 拓寬間距 */
+            gap: 24px; 
             margin-top: 10px;
             animation: viewAppear 0.3s ease-out;
             align-items: stretch; /* 保留網格高度對齊 */
@@ -475,6 +474,7 @@
             border: 1px solid #eef0ec;
             display: inline-block;
             box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+            transition: all 0.2s;
         }
 
         /* 置中備註與聯想提示 */
@@ -489,6 +489,50 @@
             width: 100%;
             max-width: 280px; 
             text-align: center;
+            transition: all 0.2s;
+        }
+
+        /* ==========================================
+           【超高質感隱藏中文遮罩】
+           ========================================== */
+        
+        /* 模式一表格 */
+        .hide-translation .chinese-cell span {
+            color: transparent !important;
+            background-color: #eef0eb !important;
+            border-color: #eef0eb !important;
+            box-shadow: none !important;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 90px;
+            transition: all 0.2s ease;
+        }
+        .hide-translation .chinese-cell span:hover {
+            color: var(--text-color) !important;
+            background-color: transparent !important;
+        }
+
+        /* 模式二卡片 */
+        .hide-translation .similar-translation,
+        .hide-translation .similar-notes {
+            color: transparent !important;
+            background-color: #eef0eb !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 120px;
+            transition: all 0.2s ease;
+        }
+        .hide-translation .similar-translation:hover,
+        .hide-translation .similar-notes:hover {
+            color: var(--text-color) !important;
+            background-color: transparent !important;
+            border-color: #eef0ec !important;
         }
 
         /* 3D 閃卡與彈窗 */
@@ -531,7 +575,7 @@
 <div class="container">
     <!-- 頂部標題區 -->
     <div class="header-area">
-        <h1>📚厚齊的英文單字本</h1>
+        <h1>📚 我的英文單字學習本</h1>
         <div class="header-btn-group">
             <button id="pwBtn" class="teacher-only" onclick="changePassword()" title="修改密碼">⚙️</button>
             <button id="loginBtn" onclick="handleLoginToggle()" title="管理員登入">🔑</button>
@@ -569,7 +613,7 @@
             <!-- 由 JS 動態產生 -->
         </select>
         <button class="btn btn-primary btn-sm teacher-only" onclick="createNewBook()">＋ 新增日期</button>
-        <button id="deleteBookBtn" class="btn btn-danger btn-sm teacher-only" onclick="deleteCurrentBook()">🗑️ 刪除日期</button>
+        <button id="deleteBookBtn" class="btn btn-danger btn-sm teacher-only" onclick="deleteCurrentBook()">🗑️ 刪除完整課堂</button>
     </div>
 
     <!-- 功能控制區 -->
@@ -625,7 +669,7 @@
         </div>
     </div>
 
-    <!-- 模式二：相似字群組表單 -->
+    <!-- 模式二：相似字群組表單 (已移除主題欄位) -->
     <div id="similarFormSection" class="form-section teacher-only">
         <div class="tab-buttons">
             <button class="tab-btn active" id="tabSimilarSingleBtn" onclick="switchSimilarTab('single')">單筆字組</button>
@@ -634,10 +678,10 @@
 
         <!-- 單筆字組新增 -->
         <div id="tab-similar-single">
-            <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">新增相似字對比群組</h3>
+            <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">新增對比字組</h3>
             <input type="hidden" id="editSimilarIndex" value="-1">
             
-            <div class="form-grid" style="grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 15px;">
+            <div class="form-grid" style="grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px;">
                 <div class="form-group">
                     <label for="groupTypeSelect">字組類型</label>
                     <select id="groupTypeSelect" class="book-select" style="min-width: unset; width: 100%;">
@@ -645,10 +689,6 @@
                         <option value="混淆字">混淆字</option>
                         <option value="關聯字">關聯字</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label for="groupTitleInput">群組主題 / 概念說明</label>
-                    <input type="text" id="groupTitleInput" placeholder="例如: 機器與裝置的大小對比" style="width: 100%; box-sizing: border-box;">
                 </div>
             </div>
             
@@ -667,9 +707,9 @@
         <!-- 批次字組匯入 -->
         <div id="tab-similar-batch" style="display: none;">
             <h3 style="margin-top: 0; color: var(--accent-color);">批次匯入對比字組</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：用 # [類型] | 標題 開頭，下方列出對比字組 (類型支援：相似字、混淆字、關聯字)</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：用 # 類別名稱（相似字、混淆字、關聯字）開頭，下方列出對比字組</p>
             <div class="form-group">
-                <textarea id="batchSimilarInput" rows="8" placeholder="# 混淆字 | direction & orientation&#10;direction,方位（向）,指物理方向&#10;orientation,取向；新生訓練,指概念導向&#10;&#10;# 相似字 | 機器大小對比&#10;device,小裝置,可攜式裝置&#10;machine,大機器,大型引擎機具"></textarea>
+                <textarea id="batchSimilarInput" rows="8" placeholder="# 混淆字&#10;direction,方位（向）,指物理方向&#10;orientation,取向；新生訓練,指概念導向&#10;&#10;# 相似字&#10;device,小裝置,可攜式裝置&#10;machine,大機器,大型引擎機具"></textarea>
             </div>
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
                 <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
@@ -740,7 +780,6 @@
                 {
                     id: "group-1",
                     type: "相似字",
-                    title: "休閒與娛樂辨析",
                     words: [
                         { english: "recreation", chinese: "娛樂、消遣", notes: "概念較抽象" },
                         { english: "entertain", chinese: "招待、使歡樂", notes: "帶有動態演出的消遣" },
@@ -759,7 +798,6 @@
                 {
                     id: "group-2",
                     type: "混淆字",
-                    title: "裝置與機器大小對比",
                     words: [
                         { english: "device", chinese: "(小)裝置", notes: "如手機、手錶" },
                         { english: "machine", chinese: "(大)機器", notes: "指具備引擎的大型機具" }
@@ -967,15 +1005,70 @@
         }
     }
 
+    // ==========================================
+    // 智慧刪除邏輯：支援只刪除常規部分、相似字部分或刪除完整課堂
+    // ==========================================
     function deleteCurrentBook() {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId);
         if (!book) return;
-        if (confirm(`確定要永久刪除「${book.name}」及其內的所有單字與相似字嗎？`)) {
-            bookList = bookList.filter(b => b.id !== currentBookId);
-            currentBookId = bookList.length > 0 ? bookList[0].id : "";
-            saveToLocalStorage(); updateBookDropdown(); renderActiveMode();
+
+        const normalCount = (book.words || []).length;
+        const similarCount = (book.similarGroups || []).length;
+
+        // 當天若兩邊都為空，則直接刪除課堂
+        if (normalCount === 0 && similarCount === 0) {
+            if (confirm(`「${book.name}」目前無任何內容，是否將其完全刪除？`)) {
+                performDeleteBook(book.id);
+            }
+            return;
         }
+
+        // 引導用戶進行細緻化分部刪除
+        const promptMsg = 
+            `「${book.name}」內容清單：\n` +
+            `• 常規單字：${normalCount} 筆\n` +
+            `• 相似字組：${similarCount} 筆\n\n` +
+            `請輸入對應的代號執行刪除：\n` +
+            `[ 1 ] 只清除 常規單字部分\n` +
+            `[ 2 ] 只清除 相似字組部分\n` +
+            `[ 3 ] 完全刪除 整個課堂日期`;
+
+        const choice = prompt(promptMsg);
+        if (choice === null) return; // 取消操作
+
+        const trimmedChoice = choice.trim();
+
+        if (trimmedChoice === '1') {
+            if (confirm(`確定要完全清除「${book.name}」的所有常規單字嗎？`)) {
+                book.words = [];
+                saveToLocalStorage();
+                renderActiveMode();
+                alert('常規單字部分已清除！');
+            }
+        } else if (trimmedChoice === '2') {
+            if (confirm(`確定要完全清除「${book.name}」的所有相似字組嗎？`)) {
+                book.similarGroups = [];
+                saveToLocalStorage();
+                renderActiveMode();
+                alert('相似字組部分已清除！');
+            }
+        } else if (trimmedChoice === '3') {
+            if (confirm(`確定要永久移除「${book.name}」這個課堂日期及其中所有的內容嗎？`)) {
+                performDeleteBook(book.id);
+            }
+        } else {
+            alert('輸入無效，未執行任何刪除操作。');
+        }
+    }
+
+    function performDeleteBook(bookId) {
+        bookList = bookList.filter(b => b.id !== bookId);
+        currentBookId = bookList.length > 0 ? bookList[0].id : "";
+        saveToLocalStorage();
+        updateBookDropdown();
+        renderActiveMode();
+        alert('課堂日期已刪除！');
     }
 
     // ==========================================
@@ -1010,14 +1103,14 @@
                 }
             });
 
-            // 2. 處理第二部分 (相似/混淆/關聯字組)
+            // 2. 處理第二部分 (相似/混淆/關聯字組 - 移除主題參考，僅追蹤類型)
             (book.similarGroups || []).forEach(group => {
                 (group.words || []).forEach(word => {
                     const wordRaw = word.english.trim();
                     const key = wordRaw.toLowerCase();
                     seenThisDay.add(key);
 
-                    const sourceTag = `[${group.type || '相似字'}: ${group.title}]${word.notes ? ' ' + word.notes.trim() : ''}`;
+                    const sourceTag = `[${group.type || '相似字'}]${word.notes ? ' ' + word.notes.trim() : ''}`;
                     
                     if (!tempWordsData[key]) {
                         tempWordsData[key] = {
@@ -1079,7 +1172,7 @@
         const englishArrow = currentSortColumn === 'english' ? (isSortAsc ? '▲' : '▼') : '';
 
         if (currentBookId === "all-books-review") {
-            header.innerHTML = `<tr><th onclick="handleSort('count')" style="width: 15%;">出現天數 ${countArrow}</th><th onclick="handleSort('english')" style="width: 30%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th></tr>`;
+            header.innerHTML = `<tr><th onclick="handleSort('count')" style="width: 15%;">出現次數 ${countArrow}</th><th onclick="handleSort('english')" style="width: 30%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th></tr>`;
         } else {
             const opHeader = isAdmin ? `<th style="width: 15%;">操作</th>` : '';
             header.innerHTML = `<tr><th onclick="handleSort('english')" style="width: 35%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th>${opHeader}</tr>`;
@@ -1114,20 +1207,20 @@
             const englishHTML = `<div class="english-container"><a href="${dictionaryUrl}" target="_blank" class="english-word-link">${escapeHTML(item.english)}</a><button class="btn-speak" onclick="speak('${escapeJS(item.english)}')">🔊</button></div>`;
 
             if (currentBookId === "all-books-review") {
-                tr.innerHTML = `<td style="text-align: center;"><span class="count-badge">${item.count} 天</span></td><td>${englishHTML}</td><td class="chinese-cell">${escapeHTML(item.chinese)}</td><td>${escapeHTML(item.notes || '')}</td>`;
+                tr.innerHTML = `<td style="text-align: center;"><span class="count-badge">${item.count}</span></td><td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(item.chinese)}</span></td><td>${escapeHTML(item.notes || '')}</td>`;
             } else {
                 let actionsHTML = '';
                 if (isAdmin) {
                     actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVocab(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
                 }
-                tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell">${escapeHTML(item.chinese)}</td><td>${escapeHTML(item.notes || '')}</td>${actionsHTML}`;
+                tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(item.chinese)}</span></td><td>${escapeHTML(item.notes || '')}</td>${actionsHTML}`;
             }
             tbody.appendChild(tr);
         });
     }
 
     // ==========================================
-    // 模式二：相似/混淆字處理 (防歪斜完全置中渲染)
+    // 模式二：相似/混淆字處理 (已移除主題欄位，純靠類別區分)
     // ==========================================
     function getAggregatedSimilarGroups() {
         let allGroups = [];
@@ -1156,8 +1249,7 @@
         displayGroups.forEach((group) => {
             if (filterText) {
                 const searchLower = filterText.toLowerCase();
-                const hasMatch = group.title.toLowerCase().includes(searchLower) || 
-                                 group.words.some(w => w.english.toLowerCase().includes(searchLower) || w.chinese.toLowerCase().includes(searchLower));
+                const hasMatch = group.words.some(w => w.english.toLowerCase().includes(searchLower) || w.chinese.toLowerCase().includes(searchLower));
                 if (!hasMatch) return;
             }
 
@@ -1196,11 +1288,11 @@
                 `;
             });
 
+            // 移除主題屬性顯示，僅留置中的類型標籤與操作按鈕
             card.innerHTML = `
                 <div class="similar-card-title">
                     <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; width: 100%;">
                         <span class="similar-type-badge">${groupType}</span>
-                        <span style="font-size: 16px; font-weight: 700;">${escapeHTML(group.title)}</span>
                     </div>
                     ${adminControls}
                 </div>
@@ -1231,13 +1323,7 @@
     function saveSimilarGroup() {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const type = document.getElementById('groupTypeSelect').value;
-        const title = document.getElementById('groupTitleInput').value.trim();
         const editIndex = parseInt(document.getElementById('editSimilarIndex').value);
-
-        if (!title) {
-            alert("請輸入群組主題！");
-            return;
-        }
 
         const words = [];
         const rows = document.querySelectorAll('.form-row-item');
@@ -1258,7 +1344,7 @@
         const book = bookList.find(b => b.id === currentBookId);
         if (!book) return;
 
-        const groupData = { id: "group-" + Date.now(), type, title, words };
+        const groupData = { id: "group-" + Date.now(), type, words };
 
         if (editIndex === -1) {
             if(!book.similarGroups) book.similarGroups = [];
@@ -1281,7 +1367,6 @@
         switchSimilarTab('single'); 
         const group = book.similarGroups[index];
         document.getElementById('groupTypeSelect').value = group.type || "相似字";
-        document.getElementById('groupTitleInput').value = group.title;
         document.getElementById('editSimilarIndex').value = index;
 
         document.getElementById('groupWordsInputs').innerHTML = '';
@@ -1289,7 +1374,7 @@
             addWordRowToForm(w.english, w.chinese, w.notes);
         });
 
-        document.getElementById('similarFormTitle').innerText = '編輯相似字對比群組';
+        document.getElementById('similarFormTitle').innerText = '編輯對比字組';
         toggleForm(true); 
     }
 
@@ -1298,13 +1383,16 @@
         const book = bookList.find(b => b.id === currentBookId);
         if (!book) return;
 
-        if (confirm('確定要永久刪除此對比群組嗎？')) {
+        if (confirm('確定要永久刪除此對比字組嗎？')) {
             book.similarGroups.splice(index, 1);
             saveToLocalStorage();
             renderSimilarTable();
         }
     }
 
+    // ==========================================
+    // 批次字組解析器：只抓取 # 類別，略過任何主題文字
+    // ==========================================
     function saveBatchSimilarGroups() {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const rawText = document.getElementById('batchSimilarInput').value.trim();
@@ -1332,23 +1420,21 @@
                     groupCount++;
                 }
 
-                const headerContent = trimmed.replace(/^#\s*/, '');
-                let type = "相似字"; 
-                let title = headerContent;
+                const headerContent = trimmed.replace(/^#\s*/, '').trim();
+                let type = "相似字"; // 預設
 
-                const match = headerContent.match(/^(相似字|混淆字|關聯字)\s*[|:：\-]\s*(.*)$/);
-                if (match) {
-                    type = match[1];
-                    title = match[2];
-                } else {
-                    if (headerContent.includes("混淆") || headerContent.includes("易混")) type = "混淆字";
-                    else if (headerContent.includes("關聯") || headerContent.includes("主題")) type = "關聯字";
+                // 智慧判定類別
+                if (headerContent.includes("混淆")) type = "混淆字";
+                else if (headerContent.includes("關聯")) type = "關聯字";
+                else if (headerContent.includes("相似")) type = "相似字";
+
+                if (["相似字", "混淆字", "關聯字"].includes(headerContent)) {
+                    type = headerContent;
                 }
 
                 currentGroup = {
                     id: "group-" + Date.now() + Math.random().toString(36).substr(2, 5),
                     type: type,
-                    title: title,
                     words: []
                 };
             } else if (currentGroup) {
@@ -1372,7 +1458,7 @@
         }
 
         if (groupCount === 0) {
-            alert('未成功解析出任何字組，請檢查格式是否包含以 # 開頭的標題！');
+            alert('未成功解析出任何字組，請檢查格式是否包含以 # 類別 開頭！');
             return;
         }
 
@@ -1525,12 +1611,11 @@
     }
 
     function clearSimilarForm() {
-        document.getElementById('groupTitleInput').value = '';
         document.getElementById('groupWordsInputs').innerHTML = '';
         document.getElementById('batchSimilarInput').value = '';
         document.getElementById('editSimilarIndex').value = '-1';
         document.getElementById('groupTypeSelect').value = '相似字';
-        document.getElementById('similarFormTitle').innerText = '新增相似字對比群組';
+        document.getElementById('similarFormTitle').innerText = '新增對比字組';
         
         addWordRowToForm(); addWordRowToForm();
         switchSimilarTab('single'); 
@@ -1575,6 +1660,8 @@
         }
         renderTable(document.getElementById('searchInput').value);
     }
+
+    fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
     function handleLoginToggle() {
         const loginBtn = document.getElementById('loginBtn');
@@ -1626,7 +1713,7 @@
             activeQuizPool = [];
             const currentGroups = getCurrentSimilarGroups();
             currentGroups.forEach(g => {
-                g.words.forEach(w => activeQuizPool.push({ ...w, notes: `[來自群組: ${g.title}] ${w.notes || ''}` }));
+                g.words.forEach(w => activeQuizPool.push({ ...w, notes: `[類型: ${g.type || '相似字'}] ${w.notes || ''}` }));
             });
             document.getElementById('quizModalTitle').innerText = "🎯 相似字混合隨機測驗";
         }
@@ -1721,6 +1808,7 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
+    // 安全轉義 JS 字串
     function escapeJS(str) {
         return str.replace(/'/g, "\\'");
     }
