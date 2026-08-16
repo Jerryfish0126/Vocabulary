@@ -486,9 +486,14 @@
         </div>
     </div>
 
-    <!-- 一鍵同步與單字表導入導出 (💡 功能按鈕精緻化) -->
+    <!-- 💡 雙向雲端同步與單字表導入導出 (💡 功能按鈕精緻化) -->
     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto; width: 100%;">
-        <button id="syncToCloudBtn" class="btn btn-success" onclick="syncToCloud()" style="background-color: var(--accent-color); font-weight: 700; width: 100%; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(140, 122, 230, 0.15);">☁️ 一鍵同步全班資料至雲端</button>
+        <!-- 雙向同步按鈕組 -->
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+            <button id="syncToCloudBtn" class="btn btn-success" onclick="syncToCloud()" style="background-color: var(--accent-color); font-weight: 700; width: 100%; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(140, 122, 230, 0.15);">📤 上傳同步至雲端 (儲存)</button>
+            <button id="pullFromCloudBtn" class="btn btn-success" onclick="pullFromCloud()" style="background-color: var(--success-color); font-weight: 700; width: 100%; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(63, 98, 18, 0.15);">📥 從雲端同步讀取 (下載)</button>
+        </div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <button class="btn btn-secondary btn-sm" onclick="exportCurrentBook()" style="font-size: 11px; padding: 10px; border-radius: 8px;">📤 匯出此課單字</button>
             <button class="btn btn-secondary btn-sm" onclick="document.getElementById('bookFileInput').click()" style="font-size: 11px; padding: 10px; border-radius: 8px;">📥 匯入單字至此</button>
@@ -787,7 +792,7 @@
         }
     }
 
-    // 💡 美化為圓角藥丸式學生名單，加入 ✏️ 編輯姓名按鈕
+    // 美化為圓角藥丸式學生名單，加入 ✏️ 編輯姓名按鈕
     function renderStudentRosterUI() {
         const container = document.getElementById('studentRosterContainer');
         if (!container) return;
@@ -801,7 +806,7 @@
                 <span class="roster-pill-name">👤 ${escapeHTML(student.name)}</span>
                 <div style="display: flex; gap: 6px;">
                     <button class="btn btn-primary btn-sm" onclick="copyStudentUrl('${student.id}')" style="background-color: var(--accent-color); font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">📋 複製</button>
-                    <!-- 💡 新增 ✏️ 編輯姓名按鈕 -->
+                    <!-- 新增 ✏️ 編輯姓名按鈕 -->
                     <button class="btn btn-secondary btn-sm" onclick="editStudentName('${student.id}')" style="background-color: #4b5563; font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;" title="編輯學生姓名">✏️</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteStudentFromRoster('${student.id}')" style="font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">🗑️</button>
                 </div>
@@ -810,7 +815,7 @@
         });
     }
 
-    // 💡 編輯學生姓名資料功能（智慧排重與無縫對齊標題）
+    // 編輯學生姓名資料功能（智慧排重與無縫對齊標題）
     function editStudentName(studentId) {
         if (!isAdmin) return;
         const student = cloudDatabase.studentRoster.find(s => s.id === studentId);
@@ -1245,6 +1250,7 @@
         saveToLocalStorage(); renderSimilarTable(); clearSimilarForm(); toggleForm(false);
     }
 
+    // 智慧型平滑上滑
     function editSimilarGroup(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
@@ -1399,6 +1405,7 @@
         saveToLocalStorage(); renderTable(); clearForm(); toggleForm(false);
     }
 
+    // 智慧型平滑上滑
     function editVocab(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
@@ -1428,6 +1435,7 @@
         if (confirm('確定刪除？')) { book.words.splice(index, 1); saveToLocalStorage(); renderTable(); }
     }
 
+    // 儲存/取消後平滑滑回原處的對策
     function toggleForm(show) {
         const normForm = document.getElementById('vocabFormSection');
         const simForm = document.getElementById('similarFormSection');
@@ -1884,7 +1892,73 @@
         } catch (error) {
             alert("❌ 同步失敗: " + error.message);
         } finally {
-            syncBtn.innerText = "☁️ 一鍵同步全班至雲端"; syncBtn.disabled = false;
+            syncBtn.innerText = "📤 上傳同步至雲端 (儲存)"; syncBtn.disabled = false;
+        }
+    }
+
+    // 💡 跨裝置雲端讀取拉取（Pull from Cloud Gist）函式，智慧覆蓋快取並即時渲染更新
+    async function pullFromCloud() {
+        if (!isAdmin) return;
+        const gistId = localStorage.getItem('gist_sync_id') || getGistIdFromUrl();
+        const token = localStorage.getItem('gist_sync_token');
+        if (!gistId) { alert("⚠️ 請先設定並儲存 Gist ID 才能讀取雲端資料！"); return; }
+        
+        const pullBtn = document.getElementById('pullFromCloudBtn');
+        const originalText = pullBtn.innerText;
+        pullBtn.innerText = "⏳ 正在自雲端讀取資料..."; pullBtn.disabled = true;
+        
+        try {
+            const headers = { 'Accept': 'application/vnd.github.v3+json' };
+            if (token && token.trim() !== "") {
+                headers['Authorization'] = `token ${token.trim()}`;
+            }
+            const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                headers: headers
+            });
+            if (!response.ok) throw new Error("讀取失敗，請確認 Token 與網路狀態。");
+            
+            const gistData = await response.json();
+            const fileKey = "vocab.json";
+            if (gistData && gistData.files && gistData.files[fileKey]) {
+                const cloudContent = JSON.parse(gistData.files[fileKey].content);
+                if (cloudContent) {
+                    if (confirm("⚠️ 確定從雲端下載最新單字庫覆蓋本機？\n(這會將此裝置資料與雲端進度強制對齊)")) {
+                        cloudDatabase = cloudContent;
+                        migrateOldDatabaseFormat();
+                        sanitizeDatabase();
+                        
+                        // 本地備份快取更新
+                        localStorage.setItem('myVocabDatabase_v8', JSON.stringify(cloudDatabase));
+                        
+                        // 指標動態對齊
+                        if (cloudDatabase.studentRoster && cloudDatabase.studentRoster.length > 0) {
+                            const activeExists = cloudDatabase.studentRoster.some(s => s.id === activeStudentId);
+                            if (!activeExists) {
+                                activeStudentId = cloudDatabase.studentRoster[0].id;
+                            }
+                        } else {
+                            activeStudentId = "";
+                        }
+                        
+                        loadStudentData(activeStudentId);
+                        updateBookDropdown();
+                        renderStudentRosterUI();
+                        updateStudentQuickSelectDropdown();
+                        renderActiveMode();
+                        
+                        showSyncStatus(true, `🌐 已同步至最新狀態`);
+                        alert("🎉 【雲端載入成功】已成功同步拉取最新雲端數據至此裝置！");
+                    }
+                } else {
+                    throw new Error("雲端單字庫資料為空！");
+                }
+            } else {
+                throw new Error("找不到雲端單字庫檔案(vocab.json)！");
+            }
+        } catch (error) {
+            alert("❌ 讀取失敗: " + error.message);
+        } finally {
+            pullBtn.innerText = originalText; pullBtn.disabled = false;
         }
     }
 
