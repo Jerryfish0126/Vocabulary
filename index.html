@@ -3,648 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>個人英文單字學習本</title>
+    <title>英文單字雲端學習本</title>
     <style>
-        /* 專注力心理學色彩系統 (日系書房與森林色調) */
         :root {
-            --bg-color: #faf8f5;          /* 暖燕麥色背景 */
-            --container-bg: #fdfdfb;      /* 象牙白紙張感 */
-            --primary-color: #2d5a27;     /* 森林深綠 (用於相似字) */
-            --primary-hover: #1e3d17;
-            --accent-color: #8c7ae6;      /* 溫和紫羅蘭 (用於關聯字) */
-            --success-color: #3f6212;     /* 抹茶綠 */
-            --success-hover: #2d4a0c;
-            --warning-color: #b45309;     /* 橡木暖橙 (用於混淆字) */
-            --warning-hover: #92400e;
-            --danger-color: #991b1b;      /* 磚紅 */
-            --danger-hover: #7f1d1d;
-            
-            --text-color: #24292f;        /* 沉穩炭灰 */
-            --text-muted: #57606a;        /* 輔助灰色 */
-            --border-color: #e1e4e6;      /* 溫和細邊框 */
-            --shadow-subtle: 0 4px 20px rgba(45, 90, 39, 0.04);
+            --bg-color: #faf8f5; --container-bg: #fdfdfb;
+            --primary-color: #2d5a27; --primary-hover: #1e3d17;
+            --accent-color: #8c7ae6; --success-color: #3f6212;
+            --success-hover: #2d4a0c; --warning-color: #b45309;
+            --warning-hover: #92400e; --danger-color: #991b1b;
+            --text-color: #24292f; --text-muted: #57606a;
+            --border-color: #e1e4e6; --shadow-subtle: 0 4px 20px rgba(45, 90, 39, 0.04);
         }
-
-        /* 徹底解決寬高撐開、內邊距擠壓歪斜的黃金關鍵 */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px; 
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
+            background-color: var(--bg-color); color: var(--text-color); 
+            margin: 0; padding: 40px 20px;
+            min-height: 100vh; position: relative; overflow-x: hidden;
         }
-
+        
         .container {
-            max-width: 1400px; /* 寬螢幕滿版體驗 */
-            width: 100%;
-            margin: 0 auto;
-            background-color: var(--container-bg);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-subtle);
-            border: 1px solid var(--border-color);
+            max-width: 1200px; width: 100%; margin: 0 auto; background-color: var(--container-bg);
+            padding: 40px; border-radius: 16px; box-shadow: var(--shadow-subtle); border: 1px solid var(--border-color);
             position: relative;
         }
 
-        /* 頂部控制區 */
-        .header-area {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
+        /* 學生登入首頁門戶樣式 */
+        .portal-wrapper { 
+            max-width: 500px; margin: 40px auto; text-align: center; 
+            padding: 40px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+            background: white; position: relative; animation: formAppear 0.3s ease-out; 
         }
+        .portal-title { color: var(--primary-color); font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .portal-input {
+            width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px;
+            font-size: 15px; margin-bottom: 15px; outline: none; text-align: center;
+        }
+        .portal-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.08); }
+        
+        .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        h1 { margin: 0; color: var(--primary-color); font-size: 26px; font-weight: 700; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        #syncIndicator { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px; display: none; }
+        .sync-badge-online { background-color: #eef0eb; color: var(--primary-color); border: 1px solid #cbd7c9; }
+        .sync-badge-offline { background-color: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
+        .header-btn-group { display: flex; gap: 8px; align-items: center; }
+        #loginBtn, #pwBtn, #homePortalBtn {
+            width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+            font-size: 15px; padding: 0; background: #fff; border: 1px solid var(--border-color); cursor: pointer; transition: all 0.2s;
+        }
+        #pwBtn, #homePortalBtn { color: var(--text-muted); }
+        #pwBtn:hover, #homePortalBtn:hover { background-color: #f3f4f6; border-color: #4b5563; }
+        body.admin-mode #loginBtn { background-color: #fee2e2; border-color: #fca5a5; color: #ef4444; }
 
-        h1 {
-            margin: 0;
-            color: var(--primary-color);
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+        /* 模式切換 */
+        .mode-toggle-area { display: flex; background-color: #f1f3f0; padding: 4px; border-radius: 10px; margin-bottom: 25px; border: 1px solid var(--border-color); }
+        .mode-tab { flex: 1; text-align: center; padding: 10px; font-weight: bold; font-size: 14px; cursor: pointer; border-radius: 8px; transition: all 0.2s; color: var(--text-muted); user-select: none; }
+        .mode-tab.active { background-color: white; color: var(--primary-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        /* 雲端同步狀態指示徽章 */
-        #syncIndicator {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            display: none;
-            letter-spacing: 0.5px;
-        }
-        .sync-badge-online {
-            background-color: #eef0eb;
-            color: var(--primary-color);
-            border: 1px solid #cbd7c9;
-        }
-        .sync-badge-offline {
-            background-color: #fee2e2;
-            color: #ef4444;
-            border: 1px solid #fca5a5;
-        }
+        /* 看板與選擇器 */
+        .dashboard-area { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background-color: #fbfbfa; border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 20px; display: flex; align-items: center; gap: 15px; }
+        .stat-icon { font-size: 24px; background-color: #f1f3f0; width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary-color); }
+        .stat-info { display: flex; flex-direction: column; }
+        .stat-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+        .stat-value { font-size: 20px; font-weight: 700; color: var(--primary-color); }
+        .book-selector-area { background-color: #f5f6f3; padding: 18px 22px; border-radius: 12px; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; border: 1px solid #e2e5e1; border-left: 5px solid var(--primary-color); }
+        .book-selector-area label { font-weight: bold; color: var(--primary-color); font-size: 15px; }
+        .book-select { padding: 10px 14px; font-size: 14px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: white; min-width: 250px; color: var(--text-color); font-weight: 600; outline: none; cursor: pointer; }
 
-        .header-btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        #loginBtn, #pwBtn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            padding: 0;
-            background: #fff;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        #loginBtn { color: var(--primary-color); }
-        #loginBtn:hover {
-            background-color: #f3f4f6;
-            border-color: var(--primary-color);
-        }
-
-        #pwBtn { color: var(--text-muted); }
-        #pwBtn:hover {
-            background-color: #f3f4f6;
-            border-color: #4b5563;
-        }
-
-        body.admin-mode #loginBtn {
-            background-color: #fee2e2;
-            border-color: #fca5a5;
-            color: #ef4444;
-        }
-
-        /* 模式切換 Tabs */
-        .mode-toggle-area {
-            display: flex;
-            background-color: #f1f3f0;
-            padding: 4px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            border: 1px solid var(--border-color);
-        }
-
-        .mode-tab {
-            flex: 1;
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-            color: var(--text-muted);
-            user-select: none;
-        }
-
-        .mode-tab.active {
-            background-color: white;
-            color: var(--primary-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        /* 學習成就看板 */
-        .dashboard-area {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background-color: #fbfbfa;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .stat-icon {
-            font-size: 24px;
-            background-color: #f1f3f0;
-            width: 44px;
-            height: 44px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-        }
-
-        .stat-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        /* 統一日期選擇區域 */
-        .book-selector-area {
-            background-color: #f5f6f3;
-            padding: 18px 22px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            border: 1px solid #e2e5e1;
-            border-left: 5px solid var(--primary-color);
-        }
-
-        .book-selector-area label {
-            font-weight: bold;
-            color: var(--primary-color);
-            font-size: 15px;
-        }
-
-        .book-select {
-            padding: 10px 14px;
-            font-size: 14px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            background-color: white;
-            min-width: 250px;
-            color: var(--text-color);
-            font-weight: 600;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        /* 功能控制 */
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .search-bar {
-            flex: 1;
-            min-width: 220px;
-            padding: 11px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            background-color: white;
-            transition: all 0.2s;
-        }
-
-        .search-bar:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.08);
-        }
-
-        /* 按鈕風格 */
-        .btn {
-            padding: 10px 18px;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
+        /* 功能按鈕 */
+        .controls { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; align-items: center; }
+        .search-bar { flex: 1; min-width: 220px; padding: 11px 16px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s; }
+        .search-bar:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.08); }
+        .btn { padding: 10px 18px; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn:hover { transform: translateY(-1px); }
         .btn-primary { background-color: var(--primary-color); }
-        .btn-primary:hover { background-color: var(--primary-hover); }
         .btn-success { background-color: var(--success-color); }
-        .btn-success:hover { background-color: var(--success-hover); }
         .btn-danger { background-color: var(--danger-color); }
-        .btn-danger:hover { background-color: var(--danger-hover); }
         .btn-secondary { background-color: #4b5563; }
-        .btn-secondary:hover { background-color: #374151; }
         .btn-warning { background-color: var(--warning-color); }
-        .btn-warning:hover { background-color: var(--warning-hover); }
         .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 6px; }
 
-        /* 教師專用控制 */
+        /* 權限控制 */
         .teacher-only { display: none !important; }
         body.admin-mode .teacher-only { display: inline-block !important; }
         body.admin-mode div.teacher-only { display: block !important; }
         body.admin-mode tr.teacher-only, body.admin-mode th.teacher-only, body.admin-mode td.teacher-only { display: table-cell !important; }
 
-        /* 表單完全隔離 */
-        body.admin-mode .form-section.teacher-only {
-            display: none !important;
-        }
-        body.admin-mode .form-section.teacher-only.active {
-            display: block !important;
-        }
+        body.admin-mode .form-section.teacher-only { display: none !important; }
+        body.admin-mode .form-section.teacher-only.active { display: block !important; }
 
-        /* 表單區域 */
-        .form-section {
-            background-color: #fbfbfa;
-            padding: 22px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 1px solid var(--border-color);
-            display: none;
-            animation: formAppear 0.2s ease-out;
-        }
+        /* 表單 */
+        .form-section { background-color: #fbfbfa; padding: 22px; border-radius: 12px; margin-bottom: 25px; border: 1px solid var(--border-color); display: none; animation: formAppear 0.2s ease-out; }
+        @keyframes formAppear { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .form-row-item { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        .form-group input, .form-group textarea { padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group textarea { resize: vertical; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .tab-btn { background: none; border: none; padding: 6px 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 4px; }
+        .tab-btn.active { background-color: #f1f3f0; color: var(--primary-color); }
 
-        @keyframes formAppear {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-row-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-
-        /* 模式一：常規表格樣式 */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background-color: white;
-            animation: viewAppear 0.3s ease-out;
-        }
-
+        /* 模式一表格 */
+        .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-color); background-color: white; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { background-color: #f5f6f3; color: var(--primary-color); font-weight: 700; font-size: 14px; user-select: none; }
         tr:hover { background-color: #fafaf9; }
-
         .english-container { display: flex; align-items: center; gap: 12px; }
         .english-word-link { font-weight: 700; text-decoration: none; border-bottom: 1px solid #cbd5e1; padding-bottom: 1px; transition: all 0.2s; }
-        .english-word-link:hover { opacity: 0.8; }
-        
-        /* 表格內特定的英文超連結樣式 */
         #vocabTable .english-word-link { color: #1e3a24; }
         #vocabTable .english-word-link:hover { color: var(--primary-color); border-bottom-color: var(--primary-color); }
-
         .btn-speak { background-color: #f1f3f0; color: var(--primary-color); border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
         .btn-speak:hover { background-color: var(--primary-color); color: white; }
         .count-badge { background-color: #f1f3f0; color: var(--primary-color); padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 13px; border: 1px solid #e2e5e1; }
+        .action-btns { display: flex; gap: 6px; }
 
-        /* ==========================================
-           模式二：詞組字卡「全置中極美防歪排版」
-           ========================================== */
-        .similar-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px; 
-            margin-top: 10px;
-            animation: viewAppear 0.3s ease-out;
-            align-items: stretch; /* 保留網格高度對齊 */
-        }
-
-        /* 外部大卡片 */
-        .similar-card {
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow-subtle);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start; /* 緊湊對齊 */
-            gap: 16px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        
-        /* 卡片滑過微飄浮效果 */
-        .similar-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(45, 90, 39, 0.08);
-        }
-
-        /* 卡片頂部配色定義 */
+        /* 模式二卡片 */
+        .similar-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 10px; }
+        .similar-card { background-color: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: var(--shadow-subtle); display: flex; flex-direction: column; gap: 16px; transition: all 0.3s; position: relative; }
+        .similar-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(45, 90, 39, 0.08); }
         .similar-card.type-相似字 { border-top: 4px solid var(--primary-color); }
         .similar-card.type-相似字 .similar-card-title { color: var(--primary-color); }
         .similar-card.type-相似字 .similar-type-badge { background-color: #eef0eb; color: var(--primary-color); }
         .similar-card.type-相似字 .english-word-link { color: var(--primary-color); border-bottom-color: #c5d7c0; }
-
         .similar-card.type-混淆字 { border-top: 4px solid var(--warning-color); }
         .similar-card.type-混淆字 .similar-card-title { color: var(--warning-color); }
         .similar-card.type-混淆字 .similar-type-badge { background-color: #fef3c7; color: var(--warning-color); }
         .similar-card.type-混淆字 .english-word-link { color: var(--warning-color); border-bottom-color: #fde68a; }
-
         .similar-card.type-關聯字 { border-top: 4px solid var(--accent-color); }
         .similar-card.type-關聯字 .similar-card-title { color: var(--accent-color); }
         .similar-card.type-關聯字 .similar-type-badge { background-color: #f3e8ff; color: var(--accent-color); }
         .similar-card.type-關聯字 .english-word-link { color: var(--accent-color); border-bottom-color: #ddd6fe; }
+        .similar-card-title { font-size: 16px; font-weight: 700; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; width: 100%; }
+        .similar-type-badge { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 20px; }
+        .sliding-sidebar-words-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .similar-word-item { background-color: #faf9f6; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; width: 100%; }
+        .similar-row-top { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+        .similar-word-left { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .similar-eng-text { font-size: 18px; font-weight: 700; }
+        .similar-translation { font-weight: 700; color: var(--text-color); font-size: 14px; background-color: rgba(255, 255, 255, 0.9); padding: 4px 14px; border-radius: 20px; border: 1px solid #eef0ec; display: inline-block; }
+        .similar-notes { font-size: 12px; color: var(--text-muted); padding-top: 8px; border-top: 1px dashed rgba(0, 0, 0, 0.05); margin-top: 4px; width: 100%; max-width: 280px; }
 
-        /* 卡片標題與操控鈕 (全置中結構) */
-        .similar-card-title {
-            font-size: 16px;
-            font-weight: 700;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--border-color);
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-align: center;
-            letter-spacing: -0.3px;
-            width: 100%;
-        }
+        /* 隱藏中文遮罩與輕觸顯現 */
+        .hide-translation .chinese-cell span { color: transparent !important; background-color: #eef0eb !important; border-color: #eef0eb !important; box-shadow: none !important; cursor: pointer; user-select: none; border-radius: 4px; display: inline-block; min-width: 90px; transition: all 0.2s; }
+        .hide-translation .chinese-cell span:hover, .hide-translation .chinese-cell span.revealed { color: var(--text-color) !important; background-color: transparent !important; }
+        .hide-translation .similar-translation, .hide-translation .similar-notes { color: transparent !important; background-color: #eef0eb !important; border-color: transparent !important; box-shadow: none !important; cursor: pointer; user-select: none; border-radius: 4px; display: inline-block; min-width: 120px; transition: all 0.2s; }
+        .hide-translation .similar-translation:hover, .hide-translation .similar-notes:hover, .hide-translation .similar-translation.revealed, .hide-translation .similar-notes.revealed { color: var(--text-color) !important; background-color: transparent !important; border-color: #eef0ec !important; }
 
-        .similar-type-badge {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 20px; /* 藥丸膠囊外觀 */
-            letter-spacing: 0.5px;
-            display: inline-block;
-        }
-
-        /* 單字行集合 */
-        .similar-words-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-        }
-
-        /* 置中紙質單字區塊 (Centered Inner word-box) */
-        .similar-word-item {
-            background-color: #faf9f6; /* 溫和紙張黃 */
-            border-radius: 10px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center;
-            text-align: center;  
-            gap: 8px;
-            position: relative;
-            transition: all 0.2s;
-            width: 100%; 
-        }
-        .similar-word-item:hover {
-            background-color: #f5f4ef;
-        }
-
-        /* 單字行上層 (英文與中文垂直排列置中) */
-        .similar-row-top {
-            display: flex;
-            flex-direction: column; 
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .similar-word-left {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .similar-eng-text {
-            font-size: 18px; 
-            font-weight: 700;
-            letter-spacing: -0.2px;
-        }
-
-        .similar-translation {
-            font-weight: 700;
-            color: var(--text-color);
-            font-size: 14px;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 4px 14px; /* 寬口膠囊樣式 */
-            border-radius: 20px;
-            border: 1px solid #eef0ec;
-            display: inline-block;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.01);
-            transition: all 0.2s;
-        }
-
-        /* 置中備註與聯想提示 */
-        .similar-notes {
-            font-size: 12px;
-            color: var(--text-muted);
-            background-color: transparent;
-            padding-top: 8px;
-            border-top: 1px dashed rgba(0, 0, 0, 0.05);
-            margin-top: 4px;
-            line-height: 1.4;
-            width: 100%;
-            max-width: 280px; 
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        /* ==========================================
-           【超高質感隱藏中文遮罩與輕觸顯現核心】
-           ========================================== */
-        
-        /* 模式一表格 */
-        .hide-translation .chinese-cell span {
-            color: transparent !important;
-            background-color: #eef0eb !important;
-            border-color: #eef0eb !important;
-            box-shadow: none !important;
-            cursor: pointer;
-            user-select: none;
-            border-radius: 4px;
-            display: inline-block;
-            min-width: 90px;
-            transition: all 0.2s ease;
-        }
-        /* 電腦滑鼠懸停 Peek */
-        .hide-translation .chinese-cell span:hover {
-            color: var(--text-color) !important;
-            background-color: transparent !important;
-        }
-        /* 行動端與點擊切換 revealed */
-        .hide-translation .chinese-cell span.revealed {
-            color: var(--text-color) !important;
-            background-color: transparent !important;
-        }
-
-        /* 模式二卡片 */
-        .hide-translation .similar-translation,
-        .hide-translation .similar-notes {
-            color: transparent !important;
-            background-color: #eef0eb !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-            cursor: pointer;
-            user-select: none;
-            border-radius: 4px;
-            display: inline-block;
-            min-width: 120px;
-            transition: all 0.2s ease;
-        }
-        /* 電腦滑鼠懸停 Peek */
-        .hide-translation .similar-translation:hover,
-        .hide-translation .similar-notes:hover {
-            color: var(--text-color) !important;
-            background-color: transparent !important;
-            border-color: #eef0ec !important;
-        }
-        /* 行動端與點擊切換 revealed */
-        .hide-translation .similar-translation.revealed,
-        .hide-translation .similar-notes.revealed {
-            color: var(--text-color) !important;
-            background-color: transparent !important;
-            border-color: #eef0ec !important;
-        }
-
-        /* 3D 閃卡與彈窗 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            justify-content: center; align-items: center;
-            z-index: 1000;
-        }
+        /* 測驗彈窗 */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(30, 41, 59, 0.4); backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
         .card-container { background: #fff; padding: 35px; border-radius: 16px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid var(--border-color); }
         .flashcard-wrapper { perspective: 1000px; margin: 25px auto; width: 100%; height: 170px; cursor: pointer; }
-        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.5s; transform-style: preserve-3d; }
         .flashcard-wrapper.flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; border: 1px dashed #cbd5e1; background-color: #fafaf7; background-image: radial-gradient(#e1e4e6 1px, transparent 0); background-size: 8px 8px; }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; border: 1px dashed #cbd5e1; background-color: #fafaf7; }
         .flashcard-front { color: var(--primary-color); }
         .flashcard-back { transform: rotateY(180deg); border-color: var(--primary-color); border-style: solid; }
-        .card-english { font-size: 32px; font-weight: 800; color: #1e3a24; margin-bottom: 8px; }
-        .card-chinese { font-size: 24px; font-weight: 700; color: var(--text-color); margin-bottom: 8px; }
+        .card-english { font-size: 32px; font-weight: 800; color: #1e3a24; }
+        .card-chinese { font-size: 24px; font-weight: 700; color: var(--text-color); }
         .card-notes { font-size: 14px; color: var(--text-muted); }
 
-        .backup-section { margin-top: 25px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
-        #fileInput { display: none; }
+        /* 學生管理與切換選單 */
+        .student-switcher-box { background-color: #eef0eb; padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid #cbd7c9; }
+        .student-switcher-select { background: transparent; border: none; color: var(--primary-color); font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
+        
+        /* 💡 藥丸卡片名冊列表樣式 */
+        .roster-pills {
+            display: flex; flex-direction: column; gap: 8px;
+            max-height: 250px; overflow-y: auto; padding: 4px;
+            border: 1px solid var(--border-color); border-radius: 8px; background: white;
+        }
+        .roster-pill-item {
+            background: #fbfbf9; border: 1px solid #cbd5e1; border-radius: 8px; 
+            padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.02); gap: 10px;
+        }
+        .roster-pill-item:hover {
+            border-color: var(--primary-color);
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(45, 90, 39, 0.05);
+            transform: translateY(-1px);
+        }
+        .roster-pill-name { font-weight: 700; font-size: 13px; color: var(--primary-color); }
 
-        /* ==========================================
-           📱 手機、平板端專屬 CSS 寬度與比例適應
-           ========================================== */
+        /* 💡 控制面板美化裝飾樣式 */
+        .sidebar-header-divider {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 5px; width: 100%;
+        }
+        .sidebar-section-card {
+            background-color: #fbfbf9 !important; border: 1px solid var(--border-color);
+            padding: 18px; border-radius: 12px; display: flex; flex-direction: column; gap: 12px; width: 100%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+        .sidebar-section-card h4 {
+            margin: 0 0 2px 0; color: var(--primary-color); font-size: 14px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sidebar-input-styled {
+            padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+            font-size: 13px; outline: none; width: 100%; transition: all 0.2s;
+            background-color: white;
+        }
+        .sidebar-input-styled:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.06);
+        }
+
+        /* 🚀 右側懸浮管理總控台樣式 */
+        .sliding-sidebar {
+            display: flex; flex-direction: column; gap: 20px;
+            position: fixed; top: 0; right: -460px;
+            width: 460px; height: 100vh;
+            background-color: var(--container-bg) !important; 
+            box-shadow: -10px 0 35px rgba(0,0,0,0.15); 
+            border-left: 1px solid var(--border-color);
+            padding: 30px;
+            overflow-y: auto; 
+            z-index: 5000;
+            transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            
+            /* 💡 修正對策：選單與把手預設為不顯示，防範學生與登入介面誤觸，安全隱蔽 */
+            display: none !important; 
+        }
+        
+        /* 側邊欄狀態開啟 */
+        .sliding-sidebar.active { right: 0 !important; }
+        
+        /* 💡 膠囊拉頁把手 */
+        .sidebar-handle {
+            position: fixed; top: 120px; right: 0; 
+            width: 28px; height: 75px; 
+            background: linear-gradient(135deg, #2d5a27, #1e3d17);
+            color: #fef08a; border-radius: 8px 0 0 8px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; box-shadow: -4px 2px 10px rgba(0,0,0,0.15);
+            font-size: 13px; user-select: none;
+            z-index: 5001; 
+            transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.2s, color 0.2s;
+            
+            /* 💡 修正對策：把手預設隱藏 */
+            display: none !important; 
+        }
+        .sidebar-handle:hover { color: white; background: var(--primary-hover); }
+        
+        /* 💡 連動效果：當控制台展開時，把手跟著向左推移 460px */
+        .sliding-sidebar.active + .sidebar-handle {
+            right: 460px !important;
+        }
+        
+        /* 💡 箭頭自動轉向 */
+        .sidebar-handle::before {
+            content: "◀";
+        }
+        .sliding-sidebar.active + .sidebar-handle::before {
+            content: "▶";
+        }
+
+        /* 💡 解鎖登入管理員後才顯示選單把手與選單本體 */
+        body.admin-mode .sliding-sidebar {
+            display: flex !important;
+        }
+        body.admin-mode .sidebar-handle {
+            display: flex !important;
+        }
+
         @media (max-width: 600px) {
-            .container {
-                padding: 20px 14px; 
-                border-radius: 12px;
-            }
-            h1 {
-                font-size: 20px;
-            }
-            .book-selector-area {
-                padding: 12px 14px;
-            }
-            .book-select {
-                width: 100%; 
-                min-width: 100%;
-            }
-            .search-bar {
-                width: 100%;
-                min-width: 100%;
-            }
-            .btn {
-                width: 100%; 
-                padding: 12px;
-            }
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px; 
-            }
-            .similar-grid {
-                grid-template-columns: 1fr; 
-                gap: 16px;
-            }
-            .similar-card {
-                padding: 18px 14px;
-            }
-            .similar-word-item {
-                padding: 12px;
-            }
-            .similar-eng-text {
-                font-size: 16px;
-            }
-            .similar-translation {
-                font-size: 13px;
-                padding: 4px 10px;
+            .container { padding: 20px 14px; border-radius: 12px; }
+            h1 { font-size: 20px; }
+            .book-selector-area { padding: 12px 14px; }
+            .book-select, .search-bar, .btn { width: 100%; min-width: 100%; }
+            .btn { padding: 12px; }
+            th, td { padding: 10px 8px; font-size: 13px; }
+            .similar-grid { grid-template-columns: 1fr; gap: 16px; }
+            .similar-card { padding: 18px 14px; }
+            .similar-word-item { padding: 12px; }
+            .similar-eng-text { font-size: 16px; }
+            .similar-translation { font-size: 13px; padding: 4px 10px; }
+            
+            /* 行動版寬度與拉出定位聯動修正 */
+            .sliding-sidebar { width: 90%; right: -90%; padding: 20px; }
+            .sliding-sidebar.active { right: 0 !important; }
+            .sliding-sidebar.active + .sidebar-handle {
+                right: 90% !important;
             }
         }
     </style>
@@ -652,198 +297,219 @@
 <body>
 
 <div class="container">
-    <!-- 頂部標題區 -->
-    <div class="header-area">
-        <h1>
-            📚 我的英文單字學習本
-            <span id="syncIndicator"></span>
-        </h1>
-        <div class="header-btn-group">
-            <button id="pwBtn" class="teacher-only" onclick="changePassword()" title="修改密碼">⚙️</button>
-            <button id="loginBtn" onclick="handleLoginToggle()" title="管理員登入">🔑</button>
-        </div>
+
+    <!-- 1. 🎓 學生專屬登入大門 -->
+    <div id="portalView" class="portal-wrapper" style="display: none;">
+        <!-- 🎓 雙擊此處進入後台 -->
+        <div style="font-size: 60px; margin-bottom: 20px; cursor: pointer; user-select: none;" ondblclick="handleLoginToggle()">🎓</div>
+        <div class="portal-title">英文自主學習系統 入口</div>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">請輸入您的姓名，即可開啟您的個人單字資料夾。</p>
+        <input type="text" id="portalStudentInput" class="portal-input" placeholder="請輸入您的姓名 (例如: 林小明0807)">
+        <button class="btn btn-primary" onclick="enterStudentFromPortal()" style="width: 100%; padding: 12px; font-size: 15px;">🚀 進入我的資料夾</button>
     </div>
 
-    <!-- 模式切換器 -->
-    <div class="mode-toggle-area">
-        <div id="modeTabNormal" class="mode-tab active" onclick="switchSystemMode('normal')">📘 常規單字本</div>
-        <div id="modeTabSimilar" class="mode-tab" onclick="switchSystemMode('similar')">🔍 相似/混淆字組</div>
-    </div>
-
-    <!-- 學習成就看板 -->
-    <div class="dashboard-area">
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-info">
-                <span class="stat-label">累積日期本</span>
-                <span id="statBooks" class="stat-value">0</span>
+    <!-- 2. 📝 主學習本程式主介面 -->
+    <div id="mainAppView" style="display: none;">
+        <div class="header-area">
+            <h1>
+                <span style="cursor: pointer; user-select: none;" ondblclick="handleLoginToggle()">📚</span>
+                <span id="mainTitleText">英文單字學習本</span>
+                <span id="syncIndicator"></span>
+            </h1>
+            <div class="header-btn-group">
+                <!-- 👥 中央總控切換器 -->
+                <div class="student-switcher-box teacher-only" id="studentSwitcherBox">
+                    <span>👥 學生資料夾：</span>
+                    <select id="studentQuickSelect" class="student-switcher-select" onchange="handleStudentQuickSwitch()"></select>
+                </div>
+                <button id="homePortalBtn" class="teacher-only" onclick="logoutToPortal()" title="回首頁">🏠</button>
+                <button id="pwBtn" class="teacher-only" onclick="changePassword()" title="修改密碼">⚙️</button>
+                <button id="loginBtn" class="teacher-only" onclick="handleLoginToggle()" title="退出管理員模式" style="background-color: #fee2e2; border-color: #fca5a5; color: #ef4444;">🔒</button>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon">📝</div>
-            <div class="stat-info">
-                <span class="stat-label" id="statWordsLabel">當日單字量</span>
-                <span id="statUniqueWords" class="stat-value">0</span>
-            </div>
-        </div>
-    </div>
 
-    <!-- 統一日期選擇區域 (共用日期筆記本) -->
-    <div class="book-selector-area" id="bookSelectorArea">
-        <label for="bookSelect">📅 選擇課堂日期：</label>
-        <select id="bookSelect" class="book-select" onchange="switchBook()">
-            <!-- 由 JS 動態產生 -->
-        </select>
-        <button class="btn btn-primary btn-sm teacher-only" onclick="createNewBook()">＋ 新增日期</button>
-        <button id="deleteBookBtn" class="btn btn-danger btn-sm teacher-only" onclick="deleteCurrentBook()">🗑️ 刪除完整課堂</button>
-    </div>
-
-    <!-- 功能控制區 -->
-    <div class="controls">
-        <input type="text" id="searchInput" class="search-bar" placeholder="搜尋英文、中文或註記...">
-        <button id="openFormBtn" class="btn btn-success teacher-only" onclick="toggleForm()">＋ 新增字組/單字</button>
-        <button class="btn btn-warning" onclick="openQuiz()">🎯 進入隨機測驗</button>
-        <button class="btn btn-secondary" onclick="toggleTranslation()">隱藏/顯示中文</button>
-    </div>
-
-    <!-- 模式一：常規單字本表單 -->
-    <div id="vocabFormSection" class="form-section teacher-only">
-        <div class="tab-buttons">
-            <button class="tab-btn active" id="tabNormalSingleBtn" onclick="switchTab('single')">單筆新增</button>
-            <button class="tab-btn" id="tabNormalBatchBtn" onclick="switchTab('batch')">批次匯入</button>
+        <div class="mode-toggle-area">
+            <div id="modeTabNormal" class="mode-tab active" onclick="switchSystemMode('normal')">📘 常規單字本</div>
+            <div id="modeTabSimilar" class="mode-tab" onclick="switchSystemMode('similar')">🔍 相似/混淆字組</div>
         </div>
 
-        <!-- 單筆新增 -->
-        <div id="tab-single">
-            <h3 id="formTitle" style="margin-top: 0; color: var(--primary-color);">新增單字</h3>
-            <input type="hidden" id="editIndex" value="-1">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="englishInput">英文單字</label>
-                    <input type="text" id="englishInput" placeholder="例如: verify">
-                </div>
-                <div class="form-group">
-                    <label for="chineseInput">中文解釋</label>
-                    <input type="text" id="chineseInput" placeholder="例如: 證實、核對">
-                </div>
-                <div class="form-group">
-                    <label for="notesInput">註記欄</label>
-                    <input type="text" id="notesInput" placeholder="例如: 常用於系統驗證">
+        <div class="dashboard-area">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <span class="stat-label">累積日期本</span>
+                    <span id="statBooks" class="stat-value">0</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-                <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
-                <button class="btn btn-primary btn-sm" onclick="saveVocab()">儲存</button>
-            </div>
-        </div>
-
-        <!-- 批次匯入 -->
-        <div id="tab-batch" style="display: none;">
-            <h3 style="margin-top: 0; color: var(--primary-color);">批次匯入常規單字</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：英文,中文,註記 (每行一筆。例：apple,蘋果,甜的)</p>
-            <div class="form-group">
-                <textarea id="batchInput" rows="5" placeholder="banana,香蕉,黃色的&#10;orange,橘子,備註說明"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-                <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
-                <button class="btn btn-success btn-sm" onclick="saveBatchVocab()">開始匯入</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 模式二：相似字群組表單 -->
-    <div id="similarFormSection" class="form-section teacher-only">
-        <div class="tab-buttons">
-            <button class="tab-btn active" id="tabSimilarSingleBtn" onclick="switchSimilarTab('single')">單筆字組</button>
-            <button class="tab-btn" id="tabSimilarBatchBtn" onclick="switchSimilarTab('batch')">批次字組</button>
-        </div>
-
-        <!-- 單筆字組新增 -->
-        <div id="tab-similar-single">
-            <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">新增對比字組</h3>
-            <input type="hidden" id="editSimilarIndex" value="-1">
-            
-            <div class="form-grid" style="grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px;">
-                <div class="form-group">
-                    <label for="groupTypeSelect">字組類型</label>
-                    <select id="groupTypeSelect" class="book-select" style="min-width: unset; width: 100%;">
-                        <option value="相似字">相似字</option>
-                        <option value="混淆字">混淆字</option>
-                        <option value="關聯字">關聯字</option>
-                    </select>
+            <div class="stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-info">
+                    <span class="stat-label" id="statWordsLabel">當日單字量</span>
+                    <span id="statUniqueWords" class="stat-value">0</span>
                 </div>
             </div>
-            
-            <div id="groupWordsInputs">
-                <!-- 動態產生單字列 -->
+        </div>
+
+        <div class="book-selector-area" id="bookSelectorArea">
+            <label for="bookSelect">📅 選擇課堂日期：</label>
+            <select id="bookSelect" class="book-select" onchange="switchBook()"></select>
+            <button class="btn btn-primary btn-sm teacher-only" onclick="createNewBook()">＋ 新增日期</button>
+            <button id="deleteBookBtn" class="btn btn-danger btn-sm teacher-only" onclick="deleteCurrentBook()">🗑️ 刪除完整課堂</button>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-bar" placeholder="搜尋英文、中文或註記...">
+            <button id="openFormBtn" class="btn btn-success teacher-only" onclick="toggleForm()">＋ 新增字組/單字</button>
+            <button class="btn btn-warning" onclick="openQuiz()">🎯 進入隨機測驗</button>
+            <button class="btn btn-secondary" onclick="toggleTranslation()">隱藏/顯示中文</button>
+        </div>
+
+        <!-- 模式一表單 -->
+        <div id="vocabFormSection" class="form-section teacher-only">
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="tabNormalSingleBtn" onclick="switchTab('single')">單筆新增</button>
+                <button class="tab-btn" id="tabNormalBatchBtn" onclick="switchTab('batch')">批次匯入</button>
             </div>
-            
-            <button class="btn btn-sm btn-secondary" onclick="addWordRowToForm()" style="margin-top: 10px;">＋ 增加單字對比列</button>
-            
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-                <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
-                <button class="btn btn-primary btn-sm" style="background-color: var(--accent-color);" onclick="saveSimilarGroup()">儲存群組</button>
+            <div id="tab-single">
+                <h3 id="formTitle" style="margin-top: 0; color: var(--primary-color);">新增單字</h3>
+                <input type="hidden" id="editIndex" value="-1">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="englishInput">英文單字</label>
+                        <input type="text" id="englishInput" placeholder="例如: verify">
+                    </div>
+                    <div class="form-group">
+                        <label for="chineseInput">中文解釋</label>
+                        <input type="text" id="chineseInput" placeholder="例如: 證實、核對">
+                    </div>
+                    <div class="form-group">
+                        <label for="notesInput">註記欄</label>
+                        <input type="text" id="notesInput" placeholder="例如: 常用於系統驗證">
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                    <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
+                    <button class="btn btn-primary btn-sm" onclick="saveVocab()">儲存</button>
+                </div>
+            </div>
+            <div id="tab-batch" style="display: none;">
+                <h3 style="margin-top: 0; color: var(--primary-color);">批次匯入常規單字</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：英文,中文,註記 (每行一筆)</p>
+                <div class="form-group">
+                    <textarea id="batchInput" rows="5" placeholder="banana,香蕉,黃色的"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                    <button class="btn btn-secondary btn-sm" onclick="clearForm(); toggleForm(false);">取消</button>
+                    <button class="btn btn-success btn-sm" onclick="saveBatchVocab()">開始匯入</button>
+                </div>
             </div>
         </div>
 
-        <!-- 批次字組匯入 -->
-        <div id="tab-similar-batch" style="display: none;">
-            <h3 style="margin-top: 0; color: var(--accent-color);">批次匯入對比字組</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：用 # 類別名稱（相似字、混淆字、關聯字）開頭，下方列出對比字組</p>
-            <div class="form-group">
-                <textarea id="batchSimilarInput" rows="8" placeholder="# 混淆字&#10;direction,方位（向）,指物理方向&#10;orientation,取向；新生訓練,指概念導向&#10;&#10;# 相似字&#10;device,小裝置,可攜式裝置&#10;machine,大機器,大型引擎機具"></textarea>
+        <!-- 模式二表單 -->
+        <div id="similarFormSection" class="form-section teacher-only">
+            <div class="tab-buttons">
+                <button class="tab-btn active" id="tabSimilarSingleBtn" onclick="switchSimilarTab('single')">單筆字組</button>
+                <button class="tab-btn" id="tabSimilarBatchBtn" onclick="switchSimilarTab('batch')">批次字組</button>
             </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-                <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
-                <button class="btn btn-success btn-sm" style="background-color: var(--accent-color);" onclick="saveBatchSimilarGroups()">開始匯入字組</button>
+            <div id="tab-similar-single">
+                <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">新增對比字組</h3>
+                <input type="hidden" id="editSimilarIndex" value="-1">
+                <div class="form-grid" style="grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="groupTypeSelect">字組類型</label>
+                        <select id="groupTypeSelect" class="book-select" style="min-width: unset; width: 100%;">
+                            <option value="相似字">相似字</option>
+                            <option value="混淆字">混淆字</option>
+                            <option value="關聯字">關聯字</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="groupWordsInputs"></div>
+                <button class="btn btn-sm btn-secondary" onclick="addWordRowToForm()" style="margin-top: 10px;">＋ 增加單字對比列</button>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                    <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
+                    <button class="btn btn-primary btn-sm" style="background-color: var(--accent-color);" onclick="saveSimilarGroup()">儲存群組</button>
+                </div>
+            </div>
+            <div id="tab-similar-batch" style="display: none;">
+                <h3 id="similarFormTitle" style="margin-top: 0; color: var(--accent-color);">批次匯入對比字組</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin-top: -5px;">格式：用 # 類別名稱開頭，下方列出對比字組</p>
+                <div class="form-group">
+                    <textarea id="batchSimilarInput" rows="8" placeholder="# 混淆字&#10;direction,方位,指物理方向&#10;orientation,取向,指概念導向"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                    <button class="btn btn-secondary btn-sm" onclick="clearSimilarForm(); toggleForm(false);">取消</button>
+                    <button class="btn btn-success btn-sm" style="background-color: var(--accent-color);" onclick="saveBatchSimilarGroups()">開始匯入字組</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 模式一：常規表格 -->
-    <div class="table-container" id="normalTableContainer">
-        <table id="vocabTable">
-            <thead id="vocabHeader"></thead>
-            <tbody id="vocabList"></tbody>
-        </table>
-    </div>
-
-    <!-- 模式二：相似字卡片排版 -->
-    <div id="similarGridContainer" class="similar-grid" style="display: none;">
-        <!-- 由 JS 動態生成卡片 -->
-    </div>
-
-    <!-- 資料備份區域與雲端全自動一鍵同步控制台 -->
-    <div class="backup-section teacher-only" style="border-top: 1px dashed var(--border-color); padding-top: 20px; margin-top: 20px; width: 100%;">
-        <div style="width: 100%; background-color: #f5f6f3; padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 15px;">
-            <h4 style="margin: 0 0 10px 0; color: var(--primary-color);">☁️ 雲端全自動一鍵同步設定（僅會安全地存在您這台電腦）</h4>
-            <p style="font-size: 12px; color: var(--text-muted); margin: -5px 0 15px 0;">在這裡綁定一次後，以後按下方「☁️ 一鍵同步至雲端」就能自動上傳，不需要再手動下載與貼上！</p>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                <input type="text" id="gistIdInput" placeholder="請貼入您的 Gist ID" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 1; min-width: 250px; font-size: 13px;">
-                <input type="password" id="gistTokenInput" placeholder="請貼入您的 GitHub Token 金鑰 (ghp_開頭)" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; flex: 1; min-width: 250px; font-size: 13px;">
-                <button class="btn btn-primary" onclick="saveGistSettings()">儲存雲端設定</button>
-            </div>
+        <!-- 表格容器 -->
+        <div class="table-container" id="normalTableContainer">
+            <table id="vocabTable">
+                <thead id="vocabHeader"></thead>
+                <tbody id="vocabList"></tbody>
+            </table>
         </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; width: 100%;">
-            <button id="syncToCloudBtn" class="btn btn-success" onclick="syncToCloud()" style="background-color: var(--accent-color); font-weight: 700;">☁️ 一鍵同步至雲端</button>
-            <button class="btn btn-secondary btn-sm" onclick="exportData()">備份導出 JSON 檔案</button>
-            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('fileInput').click()">手動匯入 JSON 備份</button>
-            <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
-        </div>
+
+        <!-- 字卡容器 -->
+        <div id="similarGridContainer" class="similar-grid" style="display: none;"></div>
     </div>
 </div>
 
-<!-- 隨機測驗 (Modal) -->
+<!-- 🚀 右側滑動管理總控台 -->
+<div class="sliding-sidebar" id="slidingSidebar">
+    
+    <!-- 💡 管理員頂部標題區 -->
+    <div class="sidebar-header-divider">
+        <h3 style="margin: 0; color: var(--primary-color); font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">⚙️ 管理員總主機台</h3>
+    </div>
+
+    <!-- 👥 學生管理名冊 (💡 精緻藥丸卡片化排版) -->
+    <div class="student-manager-card sidebar-section-card">
+        <h4>👥 學生自主資料夾管理</h4>
+        <div style="display: flex; gap: 8px; margin-bottom: 5px;">
+            <input type="text" id="newStudentName" class="sidebar-input-styled" placeholder="新增學生姓名與生日 (如: 林小明0807)">
+            <button class="btn btn-primary btn-sm" onclick="addNewStudentToRoster()" style="font-size: 12px; padding: 10px 14px; border-radius: 8px;">＋ 建立</button>
+        </div>
+        <!-- 💡 藥丸式卡片名冊展示區 -->
+        <div id="studentRosterContainer" class="roster-pills"></div>
+    </div>
+
+    <!-- ☁️ 雲端備份儲存設定 (💡 卡片化精緻排版) -->
+    <div class="sidebar-section-card">
+        <h4>☁️ 雲端 Gist 安全備份設定</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+            <input type="text" id="gistIdInput" class="sidebar-input-styled" placeholder="GitHub Gist ID">
+            <input type="password" id="gistTokenInput" class="sidebar-input-styled" placeholder="GitHub PAT Token Key">
+            <button class="btn btn-primary btn-sm" onclick="saveGistSettings()" style="width: 100%; font-size: 12px; padding: 10px;">儲存並連線設定</button>
+        </div>
+    </div>
+
+    <!-- 一鍵同步與單字表導入導出 (💡 功能按鈕精緻化) -->
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto; width: 100%;">
+        <button id="syncToCloudBtn" class="btn btn-success" onclick="syncToCloud()" style="background-color: var(--accent-color); font-weight: 700; width: 100%; padding: 12px; border-radius: 10px; box-shadow: 0 4px 12px rgba(140, 122, 230, 0.15);">☁️ 一鍵同步全班資料至雲端</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn btn-secondary btn-sm" onclick="exportCurrentBook()" style="font-size: 11px; padding: 10px; border-radius: 8px;">📤 匯出此課單字</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('bookFileInput').click()" style="font-size: 11px; padding: 10px; border-radius: 8px;">📥 匯入單字至此</button>
+        </div>
+        <input type="file" id="bookFileInput" accept=".json" onchange="importCurrentBook(event)" style="display: none !important;">
+        <button class="btn btn-danger btn-sm" onclick="resetDatabase()" style="background-color: #7f1d1d; font-weight: 700; width: 100%; margin-top: 10px; font-size: 11px; padding: 10px; border-radius: 8px;">⚠️ 格式化/重置本機資料庫</button>
+    </div>
+</div>
+
+<!-- 💡 獨立把手：防範 Mobile 點擊屏蔽 Bug (解鎖管理員後顯示) -->
+<div class="sidebar-handle" id="sidebarHandle" title="點擊展開/收回控制台"></div>
+
+<!-- 測驗彈窗 -->
 <div id="quizModal" class="modal">
     <div class="card-container">
         <h2 style="margin-top: 0; color: var(--primary-color);" id="quizModalTitle">🎯 隨機抽卡測驗</h2>
-        <p style="font-size: 13px; color: var(--text-muted);">點擊卡片可進行「3D 翻牌」查看答案</p>
-        
         <div class="flashcard-wrapper" id="flashcardWrapper" onclick="flipCard()">
             <div class="flashcard-inner">
                 <div class="flashcard-front">
-                    <div id="cardEnglish" class="card-english">verify</div>
-                    <span style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">TOUCH TO FLIP</span>
+                    <div id="cardEnglish" class="card-english"></div> 
+                    <span style="font-size: 12px; color: #a1a1aa;">TOUCH TO FLIP</span>
                 </div>
                 <div class="flashcard-back">
                     <div id="cardChinese" class="card-chinese">-</div>
@@ -851,7 +517,6 @@
                 </div>
             </div>
         </div>
-
         <div style="display: flex; gap: 10px; justify-content: center;">
             <button class="btn btn-secondary" onclick="closeQuiz()">關閉</button>
             <button class="btn btn-primary" onclick="speakCurrentQuiz()">🔊 發音</button>
@@ -861,679 +526,640 @@
 </div>
 
 <script>
-    // =========================================================================
-    // 🌐 雲端資料同步設定 (Cloud Sync Configuration)
-    // -------------------------------------------------------------------------
-    // 教師將導出的資料 (.json) 上傳至免費空間（如 GitHub Gist, Pastebin Raw 或是個人主機）
-    // 並將該直連 Raw JSON 網址貼在下方雙引號中。
-    // =========================================================================
     const CLOUD_DATA_URL = "您的GitHub_Gist直連網址"; 
 
-    // 預設一體化學習本示範資料
-    const defaultUnifiedBooks = [
-        {
-            id: "book-8-7",
-            name: "8/7 課堂學習本",
-            words: [
-                { english: 'verify', chinese: '證實、核對', notes: '常用於系統驗證' },
-                { english: 'diligent', chinese: '勤奮的', notes: '形容詞，形容學習認真' }
-            ],
-            similarGroups: [
-                {
-                    id: "group-1",
-                    type: "相似字",
-                    words: [
-                        { english: "recreation", chinese: "娛樂、消遣", notes: "概念較抽象" },
-                        { english: "entertain", chinese: "招待、使歡樂", notes: "帶有動態演出的消遣" },
-                        { english: "leisure", chinese: "閒暇、空閒", notes: "指無憂無慮的時間" }
-                    ]
-                }
-            ]
-        },
-        {
-            id: "book-8-9",
-            name: "8/9 課堂學習本",
-            words: [
-                { english: 'implement', chinese: '實施、執行', notes: '專案常用開發術語' }
-            ],
-            similarGroups: [
-                {
-                    id: "group-2",
-                    type: "混淆字",
-                    words: [
-                        { english: "device", chinese: "(小)裝置", notes: "如手機、手錶" },
-                        { english: "machine", chinese: "(大)機器", notes: "指具備引擎的大型機具" }
-                    ]
-                }
-            ]
-        }
-    ];
+    // 系統預設之資料夾資料庫結構
+    let cloudDatabase = {
+        adminPasswordHash: "",
+        studentRoster: [],
+        database: {}
+    };
 
     let bookList = [];      
     let systemMode = "normal"; 
     let currentBookId = "";    
     let isAdmin = false;
-
     let currentSortColumn = 'english'; 
     let isSortAsc = true;           
+    let activeStudentId = ""; // 目前載入的學生資料夾 ID
+    let currentQuizWord = null;
+    let activeQuizPool = [];
 
-    // ==========================================
-    // 🔐 現代標準密碼安全加密機制 (Web Crypto API SHA-256)
-    // ------------------------------------------
-    // 原生加速引擎，HTML 原始碼「不含任何預設密碼字串」，100% 乾淨防破解
-    // ==========================================
-    async function sha256(message) {
-        const msgBuffer = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex;
+    // 標準相容性 SHA-256 純 JS 加密算法
+    function sha256(ascii) {
+        function rightRotate(value, amount) {
+            return (value >>> amount) | (value << (32 - amount));
+        }
+        var mathPow = Math.pow;
+        var maxWord = mathPow(2, 32);
+        var lengthProperty = 'length';
+        var i, j;
+        var result = '';
+        var words = [];
+        var asciiLength = ascii[lengthProperty] * 8;
+        var hash = sha256.h = sha256.h || [];
+        var k = sha256.k = sha256.k || [];
+        var primeCounter = k[lengthProperty];
+        var isPrime = function(n) {
+            for (var factor = 2; factor * factor <= n; factor++) {
+                if (n % factor === 0) return false;
+            }
+            return true;
+        };
+        if (!primeCounter) {
+            var candidate = 2;
+            while (primeCounter < 64) {
+                if (isPrime(candidate)) {
+                    if (primeCounter < 8) {
+                        hash[primeCounter] = (mathPow(candidate, .5) * maxWord) | 0;
+                    }
+                    k[primeCounter] = (mathPow(candidate, 1/3) * maxWord) | 0;
+                    primeCounter++;
+                }
+                candidate++;
+            }
+        }
+        ascii += '\x80';
+        while (ascii[lengthProperty] % 64 - 56) ascii += '\x00';
+        for (i = 0; i < ascii[lengthProperty]; i++) {
+            j = ascii.charCodeAt(i);
+            if (j >> 8) return;
+            words[i >> 2] |= j << ((3 - i) % 4 * 8);
+        }
+        words[words[lengthProperty]] = ((asciiLength / maxWord) | 0);
+        words[words[lengthProperty]] = (asciiLength | 0);
+        for (j = 0; j < words[lengthProperty];) {
+            var w = words.slice(j, j += 16);
+            var oldHash = hash.slice(0);
+            hash = hash.slice(0);
+            for (i = 0; i < 64; i++) {
+                var wItem = w[i];
+                if (i >= 16) {
+                    var s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                    var s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                    w[i] = wItem = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                }
+                var ch = (hash[4] & hash[5]) ^ (~hash[4] & hash[6]);
+                var maj = (hash[0] & hash[1]) ^ (hash[0] & hash[2]) ^ (hash[1] & hash[2]);
+                var sigma0 = rightRotate(hash[0], 2) ^ rightRotate(hash[0], 13) ^ rightRotate(hash[0], 22);
+                var sigma1 = rightRotate(hash[1], 6) ^ rightRotate(hash[1], 11) ^ rightRotate(hash[1], 25);
+                var temp1 = hash[7] + sigma1 + ch + k[i] + wItem;
+                var temp2 = sigma0 + maj;
+                hash = [(temp1 + temp2) | 0].concat(hash);
+                hash[4] = (hash[4] + temp1) | 0;
+            }
+            for (i = 0; i < 8; i++) {
+                hash[i] = (hash[i] + oldHash[i]) | 0;
+            }
+        }
+        for (i = 0; i < 8; i++) {
+            var s = hash[i];
+            s = (s < 0 ? s + maxWord : s).toString(16);
+            result += '00000000'.slice(s[lengthProperty]) + s;
+        }
+        return result;
     }
 
-    // 初始化密碼系統：徹底清除舊有明文密碼 LocalStorage，保護資安
-    async function initPassword() {
-        localStorage.removeItem('adminPassword');
+    // 取得 URL 路由參數
+    function getGistIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id') || "";
+    }
+
+    function getStudentKeyFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('s') || "";
+    }
+
+    // Gist 金鑰表單初始化
+    function initGistSettingsInForm() {
+        const idInput = document.getElementById('gistIdInput');
+        const tokenInput = document.getElementById('gistTokenInput');
+        if (idInput && tokenInput) {
+            idInput.value = localStorage.getItem('gist_sync_id') || "";
+            tokenInput.value = localStorage.getItem('gist_sync_token') || "";
+        }
+    }
+
+    // 遮罩點擊監聽綁定
+    function initTouchRevealListeners() {
+        const table = document.getElementById('vocabTable');
+        const grid = document.getElementById('similarGridContainer');
+        if (table) table.addEventListener('click', handleMaskClick);
+        if (grid) grid.addEventListener('click', handleMaskClick);
+    }
+
+    // 遮罩點擊處理器
+    function handleMaskClick(e) {
+        const table = document.getElementById('vocabTable');
+        const grid = document.getElementById('similarGridContainer');
+        if (!table.classList.contains('hide-translation') && !grid.classList.contains('hide-translation')) return;
+        const target = e.target;
+        if (target.tagName === 'SPAN' && target.parentElement.classList.contains('chinese-cell')) {
+            target.classList.toggle('revealed'); e.stopPropagation(); return;
+        }
+        if (target.classList.contains('similar-translation') || target.classList.contains('similar-notes')) {
+            target.classList.toggle('revealed'); e.stopPropagation(); return;
+        }
     }
 
     window.onload = async function() {
-        // 1. 初始化安全密碼系統
-        await initPassword();
-
-        // 2. 嘗試自雲端讀取資料（雲端讀取成功會順便同步密碼雜湊）
+        // 先綁定右側拉頁把手，確保 UI 在載入任何數據前 100% 絕對能正常拉展！
+        setupSidebarInteractions(); 
+        
         await loadData();
+        
+        // 依據 URL 參數判定學生身分
+        const urlStudent = getStudentKeyFromUrl();
+        if (urlStudent) {
+            activeStudentId = urlStudent;
+            loadStudentData(urlStudent);
+        }
 
-        // 3. 回填寫入端雲端設定 (僅限教師本地)
-        initGistSettingsInForm();
+        // 老師專屬網址通道
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'true') {
+            setTimeout(() => { handleLoginToggle(); }, 300);
+        }
 
-        // 4. 初始化輕觸顯現事件監聽器（完美解決手機、平板無懸停問題）
-        initTouchRevealListeners();
-
+        updateViewVisibility();
+        renderStudentRosterUI();
+        updateStudentQuickSelectDropdown();
+        initGistSettingsInForm(); 
+        initTouchRevealListeners(); 
         updateBookDropdown();
         renderActiveMode();
     };
 
-    // ==========================================
-    // 智慧型雲端/本地自動切換資料讀取引擎
-    // ==========================================
-    async function loadData() {
-        if (CLOUD_DATA_URL && CLOUD_DATA_URL.trim() !== "" && CLOUD_DATA_URL !== "您的GitHub_Gist直連網址") {
-            try {
-                // 發起異步網絡請求
-                const response = await fetch(CLOUD_DATA_URL);
-                if (!response.ok) throw new Error("網路連線或檔案存取失敗");
-                
-                const cloudData = await response.json();
-                
-                // 支援相容性讀取：可相容純陣列格式、以及包裝密碼欄位的新版物件格式
-                if (Array.isArray(cloudData)) {
-                    bookList = cloudData;
-                } else if (cloudData && cloudData.books) {
-                    bookList = cloudData.books;
-                    // 【核心安全機制】：自動自教師雲端下載最新密碼特徵碼，並覆寫本地快取
-                    if (cloudData.adminPasswordHash) {
-                        localStorage.setItem('adminPasswordHash', cloudData.adminPasswordHash);
-                    }
-                }
-                
-                // 同步寫入本地快取，防止離線時無法複習
-                localStorage.setItem('myVocabBooks_v7_unified', JSON.stringify(bookList));
-                showSyncStatus(true);
-                
-                if (bookList.length > 0) {
-                    currentBookId = bookList[0].id;
-                }
-                return;
-            } catch (error) {
-                console.warn("❌ 雲端同步失敗，改為讀取本地快取資料:", error);
-                showSyncStatus(false, "已載入本地備份資料");
-            }
-        }
-
-        // 雲端不可用或無雲端配置，回退至讀取瀏覽器 LocalStorage
-        const storedUnified = localStorage.getItem('myVocabBooks_v7_unified');
-        if (storedUnified) {
-            bookList = JSON.parse(storedUnified);
-        } else {
-            bookList = defaultUnifiedBooks;
-            saveToLocalStorage();
-        }
-
-        if (bookList.length > 0) {
-            currentBookId = bookList[0].id;
+    // 側邊欄純點擊拉頁（Click-to-Toggle）控制策略
+    function setupSidebarInteractions() {
+        const sidebar = document.getElementById('slidingSidebar');
+        const handle = document.getElementById('sidebarHandle');
+        
+        if (handle && sidebar) {
+            handle.onclick = function(e) {
+                sidebar.classList.toggle('active');
+                e.stopPropagation(); 
+            };
+            
+            sidebar.onclick = function(e) {
+                e.stopPropagation();
+            };
+            
+            document.onclick = function() {
+                sidebar.classList.remove('active');
+            };
         }
     }
 
-    function showSyncStatus(isOnline, customText) {
-        const indicator = document.getElementById('syncIndicator');
-        if (!indicator) return;
-        indicator.style.display = 'inline-block';
-        if (isOnline) {
-            indicator.className = 'sync-badge-online';
-            indicator.innerText = '🌐 雲端已同步';
+    // 分流顯示
+    function updateViewVisibility() {
+        const urlGistId = getGistIdFromUrl() || localStorage.getItem('gist_sync_id');
+        const portalView = document.getElementById('portalView');
+        const mainAppView = document.getElementById('mainAppView');
+        
+        if ((urlGistId && activeStudentId) || isAdmin) {
+            portalView.style.display = 'none';
+            mainAppView.style.display = 'block';
         } else {
-            indicator.className = 'sync-badge-offline';
-            indicator.innerText = customText || '🔌 本地離線模式';
+            portalView.style.display = 'block';
+            mainAppView.style.display = 'none';
+        }
+    }
+
+    // 去除姓名末尾的生日數字
+    function stripBirthday(fullName) {
+        return fullName.replace(/\d+$/, "");
+    }
+
+    // 載入學生資料夾
+    function loadStudentData(studentId) {
+        if (!studentId) {
+            document.getElementById('mainTitleText').innerText = "請建立學生資料夾";
+            bookList = [];
+            currentBookId = "";
+            return;
+        }
+
+        const student = cloudDatabase.studentRoster.find(s => s.id === studentId);
+        const cleanName = student ? stripBirthday(student.name) : "";
+        const titleText = student ? `${cleanName} 的英文單字本` : "英文單字學習本";
+        
+        document.getElementById('mainTitleText').innerText = titleText;
+        document.title = titleText; 
+
+        if (!cloudDatabase.database) cloudDatabase.database = {};
+        if (!cloudDatabase.database[studentId]) {
+            cloudDatabase.database[studentId] = [];
+        }
+        
+        bookList = cloudDatabase.database[studentId]; 
+        
+        if (bookList.length > 0) {
+            currentBookId = bookList[0].id;
+            currentSortColumn = 'english'; 
+        } else {
+            currentBookId = "all-books-review"; 
+            currentSortColumn = 'count';   
+        }
+    }
+
+    function enterStudentFromPortal() {
+        const inputName = document.getElementById('portalStudentInput').value.trim();
+        if (!inputName) { alert("請輸入您的姓名與生日！"); return; }
+        
+        const matched = cloudDatabase.studentRoster.find(s => s.name === inputName);
+        if (matched) {
+            const gistId = getGistIdFromUrl() || localStorage.getItem('gist_sync_id');
+            window.location.search = `?id=${gistId}&s=${matched.id}`;
+        } else {
+            alert("找不到您的學生資料夾，請確認姓名與生日輸入無誤，或聯繫老師為您建立資料夾！");
+        }
+    }
+
+    function logoutToPortal() {
+        if (confirm("要關閉此資料夾，回到大門頁面嗎？")) {
+            const gistId = getGistIdFromUrl() || localStorage.getItem('gist_sync_id');
+            window.location.search = `?id=${gistId}`;
+        }
+    }
+
+    // 💡 修正與優化：美化為圓角藥丸式學生名單，取代醜陋的傳統表格
+    function renderStudentRosterUI() {
+        const container = document.getElementById('studentRosterContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!cloudDatabase.studentRoster) return;
+
+        cloudDatabase.studentRoster.forEach((student) => {
+            const item = document.createElement('div');
+            item.className = 'roster-pill-item';
+            item.innerHTML = `
+                <span class="roster-pill-name">👤 ${escapeHTML(student.name)}</span>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn btn-primary btn-sm" onclick="copyStudentUrl('${student.id}')" style="background-color: var(--accent-color); font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">📋 複製網址</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteStudentFromRoster('${student.id}')" style="font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">🗑️</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function copyStudentUrl(studentId) {
+        const gistId = localStorage.getItem('gist_sync_id') || getGistIdFromUrl();
+        if (!gistId) {
+            alert("⚠️ 請先在控制面板中，填入 Gist ID 並點選「儲存並連線」以生成專屬連結！");
+            return;
+        }
+        
+        const base = window.location.origin + window.location.pathname;
+        const studentUrl = `${base}?id=${gistId}&s=${studentId}`;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(studentUrl).then(() => {
+                alert(`📋 已複製學生專屬連結！可以傳送給學生囉：\n\n${studentUrl}`);
+            }).catch(() => {
+                fallbackCopyText(studentUrl);
+            });
+        } else {
+            fallbackCopyText(studentUrl);
+        }
+    }
+
+    function fallbackCopyText(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed"; 
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert(`📋 已複製學生專屬連結！可以傳送給學生囉：\n\n${text}`);
+        } catch (err) {
+            alert(`複製失敗，請手動複製以下連結給學生：\n\n${text}`);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    // 雲端本地載入
+    async function loadData() {
+        let urlGistId = getGistIdFromUrl();
+        if (!urlGistId) {
+            urlGistId = localStorage.getItem('gist_sync_id') || "";
+        } else {
+            localStorage.setItem('gist_sync_id', urlGistId);
+        }
+
+        const storedToken = localStorage.getItem('gist_sync_token') || "";
+
+        if (urlGistId && urlGistId.trim() !== "") {
+            try {
+                const headers = {
+                    'Accept': 'application/vnd.github.v3+json'
+                };
+                if (storedToken) {
+                    headers['Authorization'] = `token ${storedToken.trim()}`;
+                }
+                const response = await fetch(`https://api.github.com/gists/${urlGistId}`, {
+                    headers: headers
+                });
+                if (response.ok) {
+                    const gistData = await response.json();
+                    const fileKey = "vocab.json";
+                    if (gistData && gistData.files && gistData.files[fileKey]) {
+                        const cloudContent = JSON.parse(gistData.files[fileKey].content);
+                        if (cloudContent) {
+                            cloudDatabase = cloudContent;
+                            migrateOldDatabaseFormat(); 
+                            sanitizeDatabase(); 
+                            localStorage.setItem('myVocabDatabase_v8', JSON.stringify(cloudDatabase));
+                            showSyncStatus(true, `🌐 已連線雲端資料庫`);
+                            return;
+                        }
+                    }
+                }
+            } catch (error) {
+                // 忽略錯誤
+            }
+        }
+
+        const possibleKeys = ['myVocabDatabase_v8', 'myVocabDatabase_v5', 'myVocabDatabase', 'vocabDatabase', 'vocab_db'];
+        let stored = null;
+        for (const key of possibleKeys) {
+            const data = localStorage.getItem(key);
+            if (data) {
+                stored = data;
+                break; 
+            }
+        }
+
+        if (stored) {
+            try {
+                cloudDatabase = JSON.parse(stored);
+                migrateOldDatabaseFormat(); 
+                sanitizeDatabase(); 
+                localStorage.setItem('myVocabDatabase_v8', JSON.stringify(cloudDatabase)); 
+            } catch (e) {
+                // 容錯
+            }
+        } else {
+            saveToLocalStorage();
+        }
+    }
+
+    function sanitizeDatabase() {
+        if (!cloudDatabase) return;
+        if (!cloudDatabase.studentRoster) cloudDatabase.studentRoster = [];
+        if (!cloudDatabase.database) cloudDatabase.database = {};
+        
+        cloudDatabase.studentRoster.forEach(student => {
+            const sId = student.id;
+            if (!cloudDatabase.database[sId]) cloudDatabase.database[sId] = [];
+            const list = cloudDatabase.database[sId];
+            if (Array.isArray(list)) {
+                list.forEach((book, idx) => {
+                    if (!book.id) {
+                        book.id = "book-" + idx + "-" + Date.now();
+                    }
+                    if (!book.words) book.words = [];
+                    if (!book.similarGroups) book.similarGroups = [];
+                    
+                    book.words.forEach(w => {
+                        if (!w.english) w.english = "";
+                        if (!w.chinese) w.chinese = "";
+                        if (!w.notes) w.notes = "";
+                    });
+                });
+            }
+        });
+    }
+
+    function migrateOldDatabaseFormat() {
+        if (!cloudDatabase) {
+            cloudDatabase = { adminPasswordHash: "", studentRoster: [], database: {} };
+            return;
+        }
+        
+        if (Array.isArray(cloudDatabase)) {
+            const oldBooks = cloudDatabase;
+            cloudDatabase = {
+                adminPasswordHash: "",
+                studentRoster: [{ id: "student-default", name: "預設學生" }],
+                database: { "student-default": oldBooks }
+            };
+            return;
+        }
+
+        if (cloudDatabase.database && Array.isArray(cloudDatabase.database)) {
+            const oldBooks = cloudDatabase.database;
+            cloudDatabase.studentRoster = [{ id: "student-default", name: "預設學生" }];
+            cloudDatabase.database = { "student-default": oldBooks };
+            return;
+        }
+
+        if (!cloudDatabase.studentRoster || !Array.isArray(cloudDatabase.studentRoster)) {
+            let oldBooks = [];
+            if (cloudDatabase.bookList && Array.isArray(cloudDatabase.bookList)) {
+                oldBooks = cloudDatabase.bookList;
+            } else if (cloudDatabase.words && Array.isArray(cloudDatabase.words)) {
+                oldBooks = [{ id: "book-default", name: "預設課堂", words: cloudDatabase.words, similarGroups: [] }];
+            }
+            
+            cloudDatabase.studentRoster = [{ id: "student-default", name: "預設學生" }];
+            cloudDatabase.database = { "student-default": oldBooks };
         }
     }
 
     function saveToLocalStorage() {
-        localStorage.setItem('myVocabBooks_v7_unified', JSON.stringify(bookList));
+        if (!cloudDatabase.database) cloudDatabase.database = {};
+        if (activeStudentId) {
+            cloudDatabase.database[activeStudentId] = bookList;
+        }
+        localStorage.setItem('myVocabDatabase_v8', JSON.stringify(cloudDatabase));
         updateStats();
     }
 
-    // ==========================================
-    // ☁️ 全自動雲端儲存/寫入引擎 (僅管理員端執行)
-    // ==========================================
-    function initGistSettingsInForm() {
-        const storedId = localStorage.getItem('gist_sync_id');
-        const storedToken = localStorage.getItem('gist_sync_token');
-        if (storedId) document.getElementById('gistIdInput').value = storedId;
-        if (storedToken) document.getElementById('gistTokenInput').value = storedToken;
-    }
-
-    function saveGistSettings() {
-        const gistId = document.getElementById('gistIdInput').value.trim();
-        const token = document.getElementById('gistTokenInput').value.trim();
-        if (!gistId || !token) {
-            alert("請確實填入 Gist ID 與 Token 金鑰！");
-            return;
-        }
-        localStorage.setItem('gist_sync_id', gistId);
-        localStorage.setItem('gist_sync_token', token);
-        alert("🔒 雲端自動化設定已安全儲存在您此台電腦！");
-    }
-
-    async function syncToCloud() {
-        if (!isAdmin) return;
-        const gistId = localStorage.getItem('gist_sync_id');
-        const token = localStorage.getItem('gist_sync_token');
-
-        if (!gistId || !token) {
-            alert("請先在下方輸入並儲存您的 Gist ID 與 GitHub Token 金鑰！");
-            return;
-        }
-
-        const syncBtn = document.getElementById('syncToCloudBtn');
-        const originalText = syncBtn.innerText;
-        syncBtn.innerText = "⏳ 正在全自動上傳雲端...";
-        syncBtn.disabled = true;
-
-        // 【安全防護升級】：封裝密碼雜湊與單字清單的整合型 Payload
-        const payload = {
-            adminPasswordHash: localStorage.getItem('adminPasswordHash'),
-            books: bookList
-        };
-
-        try {
-            const response = await fetch(`https://api.github.com/gists/${gistId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    files: {
-                        "vocab.json": {
-                            content: JSON.stringify(payload, null, 2)
-                        }
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.message || "網路寫入請求失敗");
-            }
-
-            alert("🎉 【雲端同步完成】\n密碼安全特徵碼與單字資料已同步覆蓋雲端！");
-            saveToLocalStorage();
-        } catch (error) {
-            alert("❌ 全自動同步失敗:\n" + error.message + "\n\n請確認您的 Gist ID 與 Token 是否正確，且 Token 在設定時勾選了 [gist] 權限。");
-        } finally {
-            syncBtn.innerText = originalText;
-            syncBtn.disabled = false;
-        }
-    }
-
-    // ==========================================
-    // 📱 行動端與平板「輕觸顯現 / 再按隱藏」核心機制
-    // ==========================================
-    function initTouchRevealListeners() {
-        document.getElementById('vocabTable').addEventListener('click', handleMaskClick);
-        document.getElementById('similarGridContainer').addEventListener('click', handleMaskClick);
-    }
-
-    function handleMaskClick(e) {
-        const table = document.getElementById('vocabTable');
-        const grid = document.getElementById('similarGridContainer');
-        const isTableHidden = table.classList.contains('hide-translation');
-        const isGridHidden = grid.classList.contains('hide-translation');
-
-        if (!isTableHidden && !isGridHidden) return;
-
-        let target = e.target;
-
-        // 1. 處理常規表格單字的中文 span 輕觸
-        if (target.tagName === 'SPAN' && target.parentElement.classList.contains('chinese-cell')) {
-            target.classList.toggle('revealed');
-            e.stopPropagation();
-            return;
-        }
-
-        // 2. 處理第二部分對比字卡的翻譯或備註輕觸
-        if (target.classList.contains('similar-translation') || target.classList.contains('similar-notes')) {
-            target.classList.toggle('revealed');
-            e.stopPropagation();
-            return;
-        }
-    }
-
-    // 模式切換
-    function switchSystemMode(mode) {
-        systemMode = mode;
-        document.getElementById('modeTabNormal').classList.remove('active');
-        document.getElementById('modeTabSimilar').classList.remove('active');
-        
-        document.getElementById('normalTableContainer').style.display = 'none';
-        document.getElementById('similarGridContainer').style.display = 'none';
-
-        toggleForm(false); 
-
-        if (mode === 'normal') {
-            document.getElementById('modeTabNormal').classList.add('active');
-            document.getElementById('normalTableContainer').style.display = 'block';
-        } else {
-            document.getElementById('modeTabSimilar').classList.add('active');
-            document.getElementById('similarGridContainer').style.display = 'grid';
-        }
-
-        updateBookDropdown(); 
-        renderActiveMode();
-    }
-
-    function renderActiveMode() {
-        const filterVal = document.getElementById('searchInput').value;
-        if (systemMode === 'normal') {
-            renderTable(filterVal);
-        } else {
-            renderSimilarTable(filterVal);
-        }
-        updateStats();
-    }
-
-    // ==========================================
-    // 智慧型指標狀態動態切換計算 (當日單字量 vs 總單字量)
-    // ==========================================
     function updateStats() {
         document.getElementById('statBooks').innerText = bookList.length;
-
         const statLabel = document.getElementById('statWordsLabel');
         const statValue = document.getElementById('statUniqueWords');
-
         if (systemMode === 'normal') {
             if (currentBookId === "all-books-review") {
-                statLabel.innerText = "總單字量";
-                statValue.innerText = getAggregatedWords().length; 
+                statLabel.innerText = "總單字量"; statValue.innerText = getAggregatedWords().length;
             } else {
-                statLabel.innerText = "當日單字量";
-                statValue.innerText = getCurrentWords().length;    
+                statLabel.innerText = "當日單字量"; statValue.innerText = getCurrentWords().length;
             }
         } else {
             if (currentBookId === "all-books-review") {
-                statLabel.innerText = "總字組數";
-                let totalGroups = 0;
-                bookList.forEach(b => totalGroups += (b.similarGroups || []).length);
-                statValue.innerText = totalGroups;
+                statLabel.innerText = "總字組數"; statValue.innerText = 0;
             } else {
-                statLabel.innerText = "當日字組數";
                 const book = bookList.find(b => b.id === currentBookId);
+                statLabel.innerText = "當日字組數";
                 statValue.innerText = book ? (book.similarGroups || []).length : 0;
             }
         }
     }
 
-    function updateBookDropdown() {
-        const select = document.getElementById('bookSelect');
-        select.innerHTML = '';
-        bookList.forEach(book => {
-            const opt = document.createElement('option');
-            opt.value = book.id; opt.innerText = book.name;
-            if (book.id === currentBookId) opt.selected = true;
-            select.appendChild(opt);
-        });
-
-        const allOpt = document.createElement('option');
-        allOpt.value = "all-books-review"; 
-        allOpt.innerText = systemMode === 'normal' ? "📊 所有單字一覽 (自動累計次數)" : "📊 所有相似字組一覽";
-        if (currentBookId === "all-books-review") allOpt.selected = true;
-        select.appendChild(allOpt);
-
-        const deleteBtn = document.getElementById('deleteBookBtn');
-        const openFormBtn = document.getElementById('openFormBtn');
-        if (currentBookId === "all-books-review") {
-            if (deleteBtn) deleteBtn.style.display = "none";
-            if (openFormBtn) openFormBtn.style.display = "none";
-        } else {
-            if (deleteBtn && isAdmin) deleteBtn.style.display = "inline-block";
-            if (openFormBtn && isAdmin) openFormBtn.style.display = "inline-block";
-        }
-    }
-
-    function switchBook() {
-        currentBookId = document.getElementById('bookSelect').value;
-        if (currentBookId === "all-books-review") {
-            currentSortColumn = (systemMode === 'normal') ? 'count' : 'english'; 
-            isSortAsc = false;
-        } else {
-            currentSortColumn = 'english'; isSortAsc = true;
-        }
-        updateBookDropdown();
-        triggerTableLoadAnimation();
-        renderActiveMode();
-    }
-
-    function triggerTableLoadAnimation() {
-        const el = systemMode === 'normal' ? document.getElementById('normalTableContainer') : document.getElementById('similarGridContainer');
-        if (el) {
-            el.style.animation = 'none';
-            el.offsetHeight; 
-            el.style.animation = null;
-        }
-    }
-
-    function createNewBook() {
-        if (!isAdmin) return;
-        const name = prompt("請輸入新的學習日期或主題名稱 (如: 8/14 課堂)：");
-        if (name && name.trim() !== "") {
-            const id = "book-" + Date.now();
-            bookList.push({ id: id, name: name.trim(), words: [], similarGroups: [] });
-            currentBookId = id;
-            saveToLocalStorage();
-            updateBookDropdown();
-            renderActiveMode();
-        }
-    }
-
-    // 智慧刪除邏輯
-    function deleteCurrentBook() {
-        if (!isAdmin || currentBookId === "all-books-review") return;
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        const normalCount = (book.words || []).length;
-        const similarCount = (book.similarGroups || []).length;
-
-        if (normalCount === 0 && similarCount === 0) {
-            if (confirm(`「${book.name}」目前無任何內容，是否將其完全刪除？`)) {
-                performDeleteBook(book.id);
-            }
-            return;
-        }
-
-        const promptMsg = 
-            `「${book.name}」內容清單：\n` +
-            `• 常規單字：${normalCount} 筆\n` +
-            `• 相似字組：${similarCount} 筆\n\n` +
-            `請輸入對應的代號執行刪除：\n` +
-            `[ 1 ] 只清除 常規單字部分\n` +
-            `[ 2 ] 只清除 相似字組部分\n` +
-            `[ 3 ] 完全刪除 整個課堂日期`;
-
-        const choice = prompt(promptMsg);
-        if (choice === null) return; 
-
-        const trimmedChoice = choice.trim();
-
-        if (trimmedChoice === '1') {
-            if (confirm(`確定要完全清除「${book.name}」的所有常規單字嗎？`)) {
-                book.words = [];
-                saveToLocalStorage();
-                renderActiveMode();
-                alert('常規單字部分已清除！');
-            }
-        } else if (trimmedChoice === '2') {
-            if (confirm(`確定要完全清除「${book.name}」的所有相似字組嗎？`)) {
-                book.similarGroups = [];
-                saveToLocalStorage();
-                renderActiveMode();
-                alert('相似字組部分已清除！');
-            }
-        } else if (trimmedChoice === '3') {
-            if (confirm(`確定要永久移除「${book.name}」這個課堂日期及其中所有的內容嗎？`)) {
-                performDeleteBook(book.id);
-            }
-        } else {
-            alert('輸入無效，未執行任何刪除操作。');
-        }
-    }
-
-    function performDeleteBook(bookId) {
-        bookList = bookList.filter(b => b.id !== bookId);
-        currentBookId = bookList.length > 0 ? bookList[0].id : "";
-        saveToLocalStorage();
-        updateBookDropdown();
-        renderActiveMode();
-        alert('課堂日期已刪除！');
-    }
-
     function getAggregatedWords() {
-        const map = {};
+        const globalWordMap = {}; 
         
         bookList.forEach(book => {
-            const seenThisDay = new Set();
-            const tempWordsData = {}; 
+            const dayUniqueWords = new Set(); 
+            const dayWordMetadata = {}; 
             
-            (book.words || []).forEach(word => {
-                const wordRaw = word.english.trim();
-                const key = wordRaw.toLowerCase();
-                seenThisDay.add(key);
+            (book.words || []).forEach(w => {
+                if (!w || !w.english) return;
+                const engLower = w.english.trim().toLowerCase();
+                dayUniqueWords.add(engLower);
                 
-                if (!tempWordsData[key]) {
-                    tempWordsData[key] = {
-                        english: wordRaw,
-                        chineseList: [word.chinese.trim()],
-                        notesList: word.notes ? [word.notes.trim()] : []
-                    };
-                } else {
-                    if (!tempWordsData[key].chineseList.includes(word.chinese.trim())) {
-                        tempWordsData[key].chineseList.push(word.chinese.trim());
-                    }
-                    if (word.notes && !tempWordsData[key].notesList.includes(word.notes.trim())) {
-                        tempWordsData[key].notesList.push(word.notes.trim());
-                    }
+                if (!dayWordMetadata[engLower]) {
+                    dayWordMetadata[engLower] = { english: w.english, chinese: [], notes: [] };
                 }
+                if (w.chinese) dayWordMetadata[engLower].chinese.push(w.chinese.trim());
+                if (w.notes) dayWordMetadata[engLower].notes.push(w.notes.trim());
             });
-
+            
             (book.similarGroups || []).forEach(group => {
-                (group.words || []).forEach(word => {
-                    const wordRaw = word.english.trim();
-                    const key = wordRaw.toLowerCase();
-                    seenThisDay.add(key);
-
-                    const sourceTag = `[${group.type || '相似字'}]${word.notes ? ' ' + word.notes.trim() : ''}`;
+                (group.words || []).forEach(w => {
+                    if (!w || !w.english) return;
+                    const engLower = w.english.trim().toLowerCase();
+                    dayUniqueWords.add(engLower);
                     
-                    if (!tempWordsData[key]) {
-                        tempWordsData[key] = {
-                            english: wordRaw,
-                            chineseList: [word.chinese.trim()],
-                            notesList: [sourceTag]
-                        };
-                    } else {
-                        if (!tempWordsData[key].chineseList.includes(word.chinese.trim())) {
-                            tempWordsData[key].chineseList.push(word.chinese.trim());
-                        }
-                        if (!tempWordsData[key].notesList.includes(sourceTag)) {
-                            tempWordsData[key].notesList.push(sourceTag);
-                        }
+                    if (!dayWordMetadata[engLower]) {
+                        dayWordMetadata[engLower] = { english: w.english, chinese: [], notes: [] };
                     }
+                    if (w.chinese) dayWordMetadata[engLower].chinese.push(w.chinese.trim());
+                    if (w.notes) dayWordMetadata[engLower].notes.push(w.notes.trim());
                 });
             });
-
-            seenThisDay.forEach(key => {
-                const dayData = tempWordsData[key];
-                if (!map[key]) {
-                    map[key] = {
-                        english: dayData.english,
-                        chineseList: [...dayData.chineseList],
-                        notesList: [...dayData.notesList],
-                        count: 1
+            
+            dayUniqueWords.forEach(engLower => {
+                const meta = dayWordMetadata[engLower];
+                if (!globalWordMap[engLower]) {
+                    globalWordMap[engLower] = {
+                        english: meta.english, 
+                        chineseSet: new Set(),
+                        notesSet: new Set(),
+                        count: 0
                     };
-                } else {
-                    map[key].count += 1; 
-                    dayData.chineseList.forEach(chi => {
-                        if (!map[key].chineseList.includes(chi)) map[key].chineseList.push(chi);
-                    });
-                    dayData.notesList.forEach(not => {
-                        if (!map[key].notesList.includes(not)) map[key].notesList.push(not);
-                    });
                 }
+                globalWordMap[engLower].count += 1; 
+                meta.chinese.forEach(c => globalWordMap[engLower].chineseSet.add(c));
+                meta.notes.forEach(n => globalWordMap[engLower].notesSet.add(n));
             });
         });
-
-        return Object.values(map).map(item => ({ 
-            count: item.count, 
-            english: item.english, 
-            chinese: item.chineseList.join(' / '), 
-            notes: item.notesList.join('; ') 
-        }));
+        
+        return Object.values(globalWordMap).map(item => {
+            return {
+                count: item.count,
+                english: item.english,
+                chinese: Array.from(item.chineseSet).join(' / '),
+                notes: Array.from(item.notesSet).join('; ')
+            };
+        });
     }
 
     function getCurrentWords() {
         if (currentBookId === "all-books-review") return getAggregatedWords();
-        const book = bookList.find(b => b.id === currentBookId);
-        return book ? (book.words || []) : [];
+        const book = bookList.find(b => b.id === currentBookId); return book ? (book.words || []) : [];
     }
 
     function renderTableHeader() {
         const header = document.getElementById('vocabHeader');
         const countArrow = currentSortColumn === 'count' ? (isSortAsc ? '▲' : '▼') : '';
         const englishArrow = currentSortColumn === 'english' ? (isSortAsc ? '▲' : '▼') : '';
-
         if (currentBookId === "all-books-review") {
-            header.innerHTML = `<tr><th onclick="handleSort('count')" style="width: 15%;">出現次數 ${countArrow}</th><th onclick="handleSort('english')" style="width: 30%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th></tr>`;
+            header.innerHTML = `<tr><th onclick="handleSort('count')" style="width: 15%;">次數 ${countArrow}</th><th onclick="handleSort('english')" style="width: 30%;">英文 ${englishArrow}</th><th>中文</th><th>註記</th></tr>`;
         } else {
             const opHeader = isAdmin ? `<th style="width: 15%;">操作</th>` : '';
-            header.innerHTML = `<tr><th onclick="handleSort('english')" style="width: 35%;">英文 ${englishArrow}</th><th>中文</th><th>註記欄</th>${opHeader}</tr>`;
+            header.innerHTML = `<tr><th onclick="handleSort('english')" style="width: 35%;">英文 ${englishArrow}</th><th>中文</th><th>註記</th>${opHeader}</tr>`;
         }
     }
 
     function renderTable(filterText = '') {
         renderTableHeader();
-        const tbody = document.getElementById('vocabList');
-        tbody.innerHTML = '';
+        const tbody = document.getElementById('vocabList'); tbody.innerHTML = '';
         const currentWords = getCurrentWords();
-
-        let displayList = currentWords.map((item, index) => {
-            return { ...item, originalIndex: index };
-        });
+        let displayList = currentWords.map((item, index) => ({ ...item, originalIndex: index }));
 
         displayList.sort((a, b) => {
-            let valA = a[currentSortColumn] || 0;
-            let valB = b[currentSortColumn] || 0;
+            let valA = a[currentSortColumn] || 0; let valB = b[currentSortColumn] || 0;
             return typeof valA === 'string' ? (isSortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA)) : (isSortAsc ? valA - valB : valB - valA);
         });
 
         displayList.forEach((item) => {
+            const engStr = item.english ? item.english.toString().trim() : "";
+            const chiStr = item.chinese ? item.chinese.toString().trim() : "";
+            const notesStr = item.notes ? item.notes.toString().trim() : "";
+
             if (filterText) {
                 const searchLower = filterText.toLowerCase();
-                if (!item.english.toLowerCase().includes(searchLower) && !item.chinese.toLowerCase().includes(searchLower)) return;
+                if (!engStr.toLowerCase().includes(searchLower) && !chiStr.toLowerCase().includes(searchLower)) return;
             }
             const tr = document.createElement('tr');
-            const targetWord = item.english.trim().toLowerCase();
+            const targetWord = engStr.toLowerCase();
             const dictionaryUrl = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${encodeURIComponent(targetWord)}`;
-            const englishHTML = `<div class="english-container"><a href="${dictionaryUrl}" target="_blank" class="english-word-link">${escapeHTML(item.english)}</a><button class="btn-speak" onclick="speak('${escapeJS(item.english)}')">🔊</button></div>`;
+            const englishHTML = `<div class="english-container"><a href="${dictionaryUrl}" target="_blank" class="english-word-link">${escapeHTML(engStr)}</a><button class="btn-speak" onclick="speak('${escapeJS(engStr)}')">🔊</button></div>`;
 
             if (currentBookId === "all-books-review") {
-                tr.innerHTML = `<td style="text-align: center;"><span class="count-badge">${item.count}</span></td><td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(item.chinese)}</span></td><td>${escapeHTML(item.notes || '')}</td>`;
+                tr.innerHTML = `<td style="text-align: center;"><span class="count-badge">${item.count}</span></td><td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(chiStr)}</span></td><td>${escapeHTML(notesStr)}</td>`;
             } else {
                 let actionsHTML = '';
                 if (isAdmin) {
-                    actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVococab(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
+                    actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVocab(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
                 }
-                tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(item.chinese)}</span></td><td>${escapeHTML(item.notes || '')}</td>${actionsHTML}`;
+                tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(chiStr)}</span></td><td>${escapeHTML(notesStr)}</td>${actionsHTML}`;
             }
             tbody.appendChild(tr);
         });
     }
 
-    function getAggregatedSimilarGroups() {
-        let allGroups = [];
-        bookList.forEach(b => {
-            allGroups = allGroups.concat(b.similarGroups || []);
-        });
-        return allGroups;
-    }
-
-    function getCurrentSimilarGroups() {
-        if (currentBookId === "all-books-review") return getAggregatedSimilarGroups();
-        const book = bookList.find(b => b.id === currentBookId);
-        return book ? (book.similarGroups || []) : [];
-    }
-
     function renderSimilarTable(filterText = '') {
-        const container = document.getElementById('similarGridContainer');
-        container.innerHTML = '';
-
+        const container = document.getElementById('similarGridContainer'); container.innerHTML = '';
         const currentGroups = getCurrentSimilarGroups();
-
-        let displayGroups = currentGroups.map((g, index) => {
-            return { ...g, originalIndex: index };
-        });
+        let displayGroups = currentGroups.map((g, index) => ({ ...g, originalIndex: index }));
 
         displayGroups.forEach((group) => {
             if (filterText) {
                 const searchLower = filterText.toLowerCase();
-                const hasMatch = group.words.some(w => w.english.toLowerCase().includes(searchLower) || w.chinese.toLowerCase().includes(searchLower));
+                const hasMatch = group.words.some(w => {
+                    const eng = w.english ? w.english.toString() : "";
+                    const chi = w.chinese ? w.chinese.toString() : "";
+                    return eng.toLowerCase().includes(searchLower) || chi.toLowerCase().includes(searchLower);
+                });
                 if (!hasMatch) return;
             }
-
-            const groupType = group.type || "相似字"; 
-            const card = document.createElement('div');
-            card.className = `similar-card type-${groupType}`; 
-
+            const groupType = group.type || "相似字";
+            const card = document.createElement('div'); card.className = `similar-card type-${groupType}`;
             let adminControls = '';
             if (isAdmin && currentBookId !== "all-books-review") {
                 adminControls = `
                     <div style="display: flex; gap: 4px; justify-content: center; margin-top: 6px;">
                         <button class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size:11px;" onclick="editSimilarGroup(${group.originalIndex})">改</button>
                         <button class="btn btn-danger btn-sm" style="padding: 2px 8px; font-size:11px;" onclick="deleteSimilarGroup(${group.originalIndex})">刪</button>
-                    </div>
-                `;
-            } else if (isAdmin && currentBookId === "all-books-review") {
-                adminControls = `<div style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">一覽唯讀</div>`;
+                    </div>`;
             }
-
             let wordListHTML = '';
             group.words.forEach(w => {
-                const targetWord = w.english.trim().toLowerCase();
+                const eng = w.english ? w.english.toString() : "";
+                const chi = w.chinese ? w.chinese.toString() : "";
+                const note = w.notes ? w.notes.toString() : "";
+                const targetWord = eng.trim().toLowerCase();
                 const dictionaryUrl = `https://dictionary.cambridge.org/zht/詞典/英語-漢語-繁體/${encodeURIComponent(targetWord)}`;
-                
                 wordListHTML += `
                     <div class="similar-word-item">
                         <div class="similar-row-top">
                             <div class="similar-word-left">
-                                <a href="${dictionaryUrl}" target="_blank" class="english-word-link similar-eng-text">${escapeHTML(w.english)}</a>
-                                <button class="btn-speak" onclick="speak('${escapeJS(w.english)}')">🔊</button>
+                                <a href="${dictionaryUrl}" target="_blank" class="english-word-link similar-eng-text">${escapeHTML(eng)}</a>
+                                <button class="btn-speak" onclick="speak('${escapeJS(eng)}')">🔊</button>
                             </div>
-                            <div class="similar-translation">${escapeHTML(w.chinese)}</div>
+                            <div class="similar-translation">${escapeHTML(chi)}</div>
                         </div>
-                        ${w.notes ? `<div class="similar-notes">💡 ${escapeHTML(w.notes)}</div>` : ''}
-                    </div>
-                `;
+                        ${note ? `<div class="similar-notes">💡 ${escapeHTML(note)}</div>` : ''}
+                    </div>`;
             });
-
-            card.innerHTML = `
-                <div class="similar-card-title">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; width: 100%;">
-                        <span class="similar-type-badge">${groupType}</span>
-                    </div>
-                    ${adminControls}
-                </div>
-                <div class="similar-words-list">
-                    ${wordListHTML}
-                </div>
-            `;
+            card.innerHTML = `<div class="similar-card-title"><span class="similar-type-badge">${groupType}</span>${adminControls}</div><div class="sliding-sidebar-words-list" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">${wordListHTML}</div>`;
             container.appendChild(card);
         });
     }
@@ -1541,16 +1167,12 @@
     function addWordRowToForm(english = '', chinese = '', notes = '') {
         const container = document.getElementById('groupWordsInputs');
         const rowId = "row-" + Date.now() + Math.random().toString(36).substr(2, 5);
-
-        const row = document.createElement('div');
-        row.className = 'form-row-item';
-        row.id = rowId;
+        const row = document.createElement('div'); row.className = 'form-row-item'; row.id = rowId;
         row.innerHTML = `
-            <input type="text" class="group-eng-input" placeholder="單字 (如: device)" value="${escapeHTML(english)}">
-            <input type="text" class="group-chi-input" placeholder="對比翻譯 (如: 小裝置)" value="${escapeHTML(chinese)}">
-            <input type="text" class="group-not-input" placeholder="補充分析/字根" value="${escapeHTML(notes)}">
-            <button class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove()" style="padding: 6px 10px;">❌</button>
-        `;
+            <input type="text" class="group-eng-input" placeholder="單字" value="${escapeHTML(english)}">
+            <input type="text" class="group-chi-input" placeholder="對比翻譯" value="${escapeHTML(chinese)}">
+            <input type="text" class="group-not-input" placeholder="備註/分析" value="${escapeHTML(notes)}">
+            <button class="btn btn-danger btn-sm" onclick="document.getElementById('${rowId}').remove()">❌</button>`;
         container.appendChild(row);
     }
 
@@ -1558,277 +1180,207 @@
         if (!isAdmin || currentBookId === "all-books-review") return;
         const type = document.getElementById('groupTypeSelect').value;
         const editIndex = parseInt(document.getElementById('editSimilarIndex').value);
-
         const words = [];
         const rows = document.querySelectorAll('.form-row-item');
         rows.forEach(row => {
             const eng = row.querySelector('.group-eng-input').value.trim();
             const chi = row.querySelector('.group-chi-input').value.trim();
             const not = row.querySelector('.group-not-input').value.trim();
-            if (eng && chi) {
-                words.push({ english: eng, chinese: chi, notes: not });
-            }
+            if (eng && chi) words.push({ english: eng, chinese: chi, notes: not });
         });
-
-        if (words.length < 1) {
-            alert("請至少填入一組完整的單字與對比翻譯！");
-            return;
-        }
-
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
+        if (words.length < 1) { alert("請填寫對比詞！"); return; }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
         const groupData = { id: "group-" + Date.now(), type, words };
-
         if (editIndex === -1) {
-            if(!book.similarGroups) book.similarGroups = [];
+            if (!book.similarGroups) book.similarGroups = [];
             book.similarGroups.push(groupData);
-        } else {
-            book.similarGroups[editIndex] = groupData;
-        }
-
-        saveToLocalStorage();
-        renderSimilarTable();
-        clearSimilarForm();
-        toggleForm(false);
+        } else { book.similarGroups[editIndex] = groupData; }
+        saveToLocalStorage(); renderSimilarTable(); clearSimilarForm(); toggleForm(false);
     }
 
     function editSimilarGroup(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        switchSimilarTab('single'); 
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        switchSimilarTab('single');
         const group = book.similarGroups[index];
         document.getElementById('groupTypeSelect').value = group.type || "相似字";
         document.getElementById('editSimilarIndex').value = index;
-
         document.getElementById('groupWordsInputs').innerHTML = '';
-        group.words.forEach(w => {
-            addWordRowToForm(w.english, w.chinese, w.notes);
-        });
+        group.words.forEach(w => addWordRowToForm(w.english, w.chinese, w.notes));
+        document.getElementById('similarFormTitle').innerText = '編輯對比字組'; toggleForm(true);
+    }
 
-        document.getElementById('similarFormTitle').innerText = '編輯對比字組';
-        toggleForm(true); 
+    function addNewStudentToRoster() {
+        const nameInput = document.getElementById('newStudentName');
+        const name = nameInput.value.trim();
+        if (!name) { alert("請輸入姓名與生日數字！"); return; }
+
+        const id = "student-" + Date.now();
+        if (!cloudDatabase.studentRoster) cloudDatabase.studentRoster = [];
+        if (!cloudDatabase.database) cloudDatabase.database = {};
+
+        cloudDatabase.studentRoster.push({ id, name });
+        cloudDatabase.database[id] = []; 
+
+        activeStudentId = id;
+        loadStudentData(id);
+
+        saveToLocalStorage();
+        nameInput.value = '';
+        
+        renderStudentRosterUI();
+        updateStudentQuickSelectDropdown();
+        updateBookDropdown();
+        renderActiveMode();
+
+        alert(`🎉 學生「${name}」的獨立資料夾建立完成！\n系統已自動切換至該生。`);
     }
 
     function deleteSimilarGroup(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        if (confirm('確定要永久刪除此對比字組嗎？')) {
-            book.similarGroups.splice(index, 1);
-            saveToLocalStorage();
-            renderSimilarTable();
-        }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        if (confirm('確認刪除此對比組？')) { book.similarGroups.splice(index, 1); saveToLocalStorage(); renderSimilarTable(); }
     }
 
     function saveBatchSimilarGroups() {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const rawText = document.getElementById('batchSimilarInput').value.trim();
-        if (!rawText) {
-            alert('請輸入要批次匯入的對比字組內容！');
-            return;
-        }
-
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
+        if (!rawText) { alert('請填寫內容！'); return; }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
         const lines = rawText.split('\n');
-        let currentGroup = null;
-        let groupCount = 0;
-        let wordCount = 0;
+        let currentGroup = null; let groupCount = 0; let wordCount = 0;
 
         lines.forEach(line => {
-            const trimmed = line.trim();
-            if (!trimmed) return;
-
+            const trimmed = line.trim(); if (!trimmed) return;
             if (trimmed.startsWith('#')) {
                 if (currentGroup && currentGroup.words.length > 0) {
                     if (!book.similarGroups) book.similarGroups = [];
-                    book.similarGroups.push(currentGroup);
-                    groupCount++;
+                    book.similarGroups.push(currentGroup); groupCount++;
                 }
-
                 const headerContent = trimmed.replace(/^#\s*/, '').trim();
-                let type = "相似字"; 
-
+                let type = "相似字";
                 if (headerContent.includes("混淆")) type = "混淆字";
                 else if (headerContent.includes("關聯")) type = "關聯字";
-                else if (headerContent.includes("相似")) type = "相似字";
-
-                if (["相似字", "混淆字", "關聯字"].includes(headerContent)) {
-                    type = headerContent;
-                }
-
-                currentGroup = {
-                    id: "group-" + Date.now() + Math.random().toString(36).substr(2, 5),
-                    type: type,
-                    words: []
-                };
+                if (["相似字", "混淆字", "關聯字"].includes(headerContent)) type = headerContent;
+                currentGroup = { id: "group-" + Date.now() + Math.random().toString(36).substr(2, 5), type, words: [] };
             } else if (currentGroup) {
                 const parts = trimmed.split(',');
                 if (parts.length >= 2) {
-                    const english = parts[0].trim();
-                    const chinese = parts[1].trim();
-                    const notes = parts[2] ? parts[2].trim() : '';
-                    if (english && chinese) {
-                        currentGroup.words.push({ english, chinese, notes });
-                        wordCount++;
-                    }
+                    const english = parts[0].trim(); const chinese = parts[1].trim(); const notes = parts[2] ? parts[2].trim() : '';
+                    if (english && chinese) { currentGroup.words.push({ english, chinese, notes }); wordCount++; }
                 }
             }
         });
-
         if (currentGroup && currentGroup.words.length > 0) {
             if (!book.similarGroups) book.similarGroups = [];
-            book.similarGroups.push(currentGroup);
-            groupCount++;
+            book.similarGroups.push(currentGroup); groupCount++;
         }
-
-        if (groupCount === 0) {
-            alert('未成功解析出任何字組，請檢查格式是否包含以 # 類別 開頭！');
-            return;
-        }
-
-        saveToLocalStorage();
-        renderSimilarTable();
-        document.getElementById('batchSimilarInput').value = '';
-        toggleForm(false);
-        alert(`成功新增 ${groupCount} 組對比字組 (共計 ${wordCount} 個單字) 至「${book.name}」！`);
+        saveToLocalStorage(); renderSimilarTable(); document.getElementById('batchSimilarInput').value = ''; toggleForm(false);
+        alert(`成功新增 ${groupCount} 組，共計 ${wordCount} 個單字！`);
     }
 
     function saveBatchVocab() {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const rawText = document.getElementById('batchInput').value.trim();
-        if (!rawText) {
-            alert('請輸入要批次匯入的常規單字！');
-            return;
-        }
-
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        const lines = rawText.split('\n');
-        let count = 0;
+        if (!rawText) { alert('請填寫單字！'); return; }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        const lines = rawText.split('\n'); let count = 0;
 
         lines.forEach(line => {
-            const trimmed = line.trim();
-            if (!trimmed) return;
-
+            const trimmed = line.trim(); if (!trimmed) return;
             const parts = trimmed.split(',');
             if (parts.length >= 2) {
-                const english = parts[0].trim();
-                const chinese = parts[1].trim();
-                const notes = parts[2] ? parts[2].trim() : '';
-                if (english && chinese) {
-                    book.words.push({ english, chinese, notes });
-                    count++;
-                }
+                const english = parts[0].trim(); const chinese = parts[1].trim(); const notes = parts[2] ? parts[2].trim() : '';
+                if (english && chinese) { book.words.push({ english, chinese, notes }); count++; }
             }
         });
+        saveToLocalStorage(); renderTable(); document.getElementById('batchInput').value = ''; toggleForm(false);
+        alert(`成功匯入 ${count} 個單字！`);
+    }
 
-        if (count === 0) {
-            alert('沒有成功解析任何單字，請檢查格式。');
-            return;
+    // 💡 側邊欄純點擊拉頁（Click-to-Toggle）控制策略
+    function setupSidebarInteractions() {
+        const sidebar = document.getElementById('slidingSidebar');
+        const handle = document.getElementById('sidebarHandle');
+        
+        if (handle && sidebar) {
+            handle.onclick = function(e) {
+                sidebar.classList.toggle('active');
+                e.stopPropagation(); 
+            };
+            
+            sidebar.onclick = function(e) {
+                e.stopPropagation();
+            };
+            
+            document.onclick = function() {
+                sidebar.classList.remove('active');
+            };
         }
-
-        saveToLocalStorage();
-        renderTable();
-        document.getElementById('batchInput').value = '';
-        toggleForm(false);
-        alert(`成功匯入 ${count} 個單字至「${book.name}」！`);
     }
 
     function saveVocab() {
-        if (!isAdmin || currentBookId === "all-books-review") return;
+        if (!isAdmin) return;
+        if (!currentBookId || currentBookId === "all-books-review") {
+            alert('⚠️ 請先新增日期課堂，再進行單字新增！');
+            return;
+        }
         const english = document.getElementById('englishInput').value.trim();
         const chinese = document.getElementById('chineseInput').value.trim();
         const notes = document.getElementById('notesInput').value.trim();
         const editIndex = parseInt(document.getElementById('editIndex').value);
-
-        if (!english || !chinese) {
-            alert('請完整填寫英文與中文');
-            return;
-        }
-
+        if (!english || !chinese) { alert('請完整填寫英文、中文！'); return; }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
         const data = { english, chinese, notes };
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
 
         if (editIndex === -1) {
+            if (!book.words) book.words = [];
             book.words.push(data);
-        } else {
-            book.words[editIndex] = data; 
         }
-
-        saveToLocalStorage();
-        renderTable();
-        clearForm();
-        toggleForm(false);
+        else book.words[editIndex] = data;
+        saveToLocalStorage(); renderTable(); clearForm(); toggleForm(false);
     }
 
     function editVocab(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        switchTab('single'); 
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        switchTab('single');
         const item = book.words[index];
         document.getElementById('englishInput').value = item.english;
         document.getElementById('chineseInput').value = item.chinese;
         document.getElementById('notesInput').value = item.notes || '';
         document.getElementById('editIndex').value = index;
-        
-        document.getElementById('formTitle').innerText = '編輯資料';
-        toggleForm(true); 
+        document.getElementById('formTitle').innerText = '編輯資料'; toggleForm(true);
     }
 
     function deleteVocab(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
-        const book = bookList.find(b => b.id === currentBookId);
-        if (!book) return;
-
-        if (confirm('確定要刪除這筆資料嗎？')) {
-            book.words.splice(index, 1);
-            saveToLocalStorage();
-            renderTable();
-        }
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        if (confirm('確定刪除？')) { book.words.splice(index, 1); saveToLocalStorage(); renderTable(); }
     }
 
     function toggleForm(show) {
         const normForm = document.getElementById('vocabFormSection');
         const simForm = document.getElementById('similarFormSection');
-
         const isNormActive = normForm.classList.contains('active');
         const isSimActive = simForm.classList.contains('active');
-
-        normForm.classList.remove('active');
-        simForm.classList.remove('active');
-
-        if (show === false) {
-            return; 
+        
+        if (show !== false) {
+            if (!currentBookId || currentBookId === "all-books-review") {
+                alert("⚠️ 請先新增日期課堂，再進行新增操作！");
+                return;
+            }
         }
+        
+        normForm.classList.remove('active'); simForm.classList.remove('active');
+        if (show === false) return;
 
         if (systemMode === 'normal') {
-            if (show === true) {
-                normForm.classList.add('active');
-            } else {
-                if (!isNormActive) {
-                    clearForm(); 
-                    normForm.classList.add('active');
-                }
-            }
+            if (show === true) normForm.classList.add('active');
+            else if (!isNormActive) { clearForm(); normForm.classList.add('active'); }
         } else {
-            if (show === true) {
-                simForm.classList.add('active');
-            } else {
-                if (!isSimActive) {
-                    clearSimilarForm(); 
-                    simForm.classList.add('active');
-                }
-            }
+            if (show === true) simForm.classList.add('active');
+            else if (!isSimActive) { clearSimilarForm(); simForm.classList.add('active'); }
         }
     }
 
@@ -1846,9 +1398,7 @@
         document.getElementById('editSimilarIndex').value = '-1';
         document.getElementById('groupTypeSelect').value = '相似字';
         document.getElementById('similarFormTitle').innerText = '新增對比字組';
-        
-        addWordRowToForm(); addWordRowToForm();
-        switchSimilarTab('single'); 
+        addWordRowToForm(); addWordRowToForm(); switchSimilarTab('single');
     }
 
     function switchTab(tabName) {
@@ -1856,7 +1406,6 @@
         document.getElementById('tab-batch').style.display = 'none';
         document.getElementById('tabNormalSingleBtn').classList.remove('active');
         document.getElementById('tabNormalBatchBtn').classList.remove('active');
-
         if (tabName === 'single') {
             document.getElementById('tab-single').style.display = 'block';
             document.getElementById('tabNormalSingleBtn').classList.add('active');
@@ -1871,7 +1420,6 @@
         document.getElementById('tab-similar-batch').style.display = 'none';
         document.getElementById('tabSimilarSingleBtn').classList.remove('active');
         document.getElementById('tabSimilarBatchBtn').classList.remove('active');
-
         if (tabName === 'single') {
             document.getElementById('tab-similar-single').style.display = 'block';
             document.getElementById('tabSimilarSingleBtn').classList.add('active');
@@ -1882,207 +1430,489 @@
     }
 
     function handleSort(column) {
-        if (currentSortColumn === column) {
-            isSortAsc = !isSortAsc; 
-        } else {
-            currentSortColumn = column;
-            isSortAsc = true;
-        }
+        if (currentSortColumn === column) { isSortAsc = !isSortAsc; }
+        else { currentSortColumn = column; isSortAsc = true; }
         renderTable(document.getElementById('searchInput').value);
     }
 
-    // ==========================================
-    // 🔐 「零硬編碼」雲端安全登入引擎
-    // ==========================================
     async function handleLoginToggle() {
-        const loginBtn = document.getElementById('loginBtn');
         if (!isAdmin) {
-            let storedHash = localStorage.getItem('adminPasswordHash');
-
-            // 【核心安全亮點：首度使用、自動提示自訂初始密碼】
+            let storedHash = cloudDatabase.adminPasswordHash || "";
             if (!storedHash) {
-                const newPassword = prompt("【首次使用初始化設定】\n偵測到您（老師）尚未設定管理員密碼。\n\n請在此輸入您自訂的新密碼：");
-                if (!newPassword || newPassword.trim() === "") {
-                    alert("取消密碼設定，登入失敗。");
-                    return;
-                }
-                const newHash = await sha256(newPassword.trim());
-                localStorage.setItem('adminPasswordHash', newHash);
-                storedHash = newHash;
-                alert("🎉 密碼本地註冊成功！\n\n【非常重要】：請您登入後，滑到最下方點擊「☁️ 一鍵同步至雲端」，這樣新密碼就會寫入您的私人 Gist 雲端中，確保未來換電腦登入時密碼也同步！");
+                const newPassword = prompt("【首次使用管理員權限】請設定一組管理密碼：");
+                if (!newPassword || newPassword.trim() === "") { alert("密碼無效，登入失敗。"); return; }
+                const newHash = sha256(newPassword.trim());
+                cloudDatabase.adminPasswordHash = newHash;
+                saveToLocalStorage();
+                alert("🎉 密碼設定成功！請開啟右側隱藏的控制面板進行雲端同步。");
             } else {
-                const passwordInput = prompt("請輸入管理員密碼：");
-                if (passwordInput === null) return; 
-
-                const inputHash = await sha256(passwordInput.trim());
-                if (inputHash === storedHash) {
-                    // 登入驗證成功
-                } else {
-                    alert("密碼錯誤！");
-                    return;
-                }
+                const passwordInput = prompt("🔑 請輸入管理員密碼："); if (passwordInput === null) return;
+                const inputHash = sha256(passwordInput.trim());
+                if (inputHash !== storedHash) { alert("密碼錯誤！"); return; }
             }
-
-            isAdmin = true;
-            document.body.classList.add('admin-mode');
-            loginBtn.innerText = "🔒"; loginBtn.title = "退出管理員模式";
-            updateBookDropdown();
-            renderActiveMode();
+            isAdmin = true; document.body.classList.add('admin-mode');
+            
+            if (cloudDatabase.studentRoster && cloudDatabase.studentRoster.length > 0) {
+                activeStudentId = cloudDatabase.studentRoster[0].id;
+                loadStudentData(activeStudentId);
+            } else {
+                activeStudentId = "";
+                loadStudentData("");
+            }
+            
+            updateViewVisibility(); updateStudentQuickSelectDropdown(); updateBookDropdown(); updateSidebarPrompt(); renderActiveMode(); renderStudentRosterUI();
         } else {
-            isAdmin = false;
-            document.body.classList.remove('admin-mode');
-            loginBtn.innerText = "🔑"; loginBtn.title = "管理員登入";
+            isAdmin = false; document.body.classList.remove('admin-mode');
             toggleForm(false);
-            updateBookDropdown();
-            renderActiveMode();
+            
+            const urlStudent = getStudentKeyFromUrl();
+            if (!urlStudent) activeStudentId = "";
+            
+            updateViewVisibility(); updateBookDropdown(); updateSidebarPrompt(); renderActiveMode();
         }
     }
 
     async function changePassword() {
         if (!isAdmin) return;
-        const storedHash = localStorage.getItem('adminPasswordHash');
-        const oldPwd = prompt("請輸入舊密碼：");
-        if (oldPwd === null) return;
-
-        const oldHash = await sha256(oldPwd.trim());
+        const storedHash = cloudDatabase.adminPasswordHash || "";
+        const oldPwd = prompt("請輸入舊密碼："); if (oldPwd === null) return;
+        const oldHash = sha256(oldPwd.trim());
         if (oldHash === storedHash) {
             const newPwd = prompt("請輸入新密碼：");
             if (newPwd && newPwd.trim() !== "") {
-                const newHash = await sha256(newPwd.trim());
-                localStorage.setItem('adminPasswordHash', newHash);
-                alert("密碼更新成功！\n請記得再次點擊最下方的「一鍵同步至雲端」以保存變更。");
+                const newHash = sha256(newPwd.trim());
+                cloudDatabase.adminPasswordHash = newHash;
+                saveToLocalStorage();
+                alert("密碼更新成功！");
             }
-        } else {
-            alert("舊密碼驗證失敗。");
-        }
+        } else { alert("舊密碼驗證失敗。"); }
     }
 
-    let currentQuizWord = null;
-    let activeQuizPool = [];
+    function deleteStudentFromRoster(studentId) {
+        const student = cloudDatabase.studentRoster.find(s => s.id === studentId);
+        if (!student) return;
+        if (confirm(`⚠️ 確定要永久刪除「${student.name}」的專屬單字資料夾嗎？`)) {
+            cloudDatabase.studentRoster = cloudDatabase.studentRoster.filter(s => s.id !== studentId);
+            delete cloudDatabase.database[studentId];
+            
+            if (activeStudentId === studentId) {
+                activeStudentId = cloudDatabase.studentRoster.length > 0 ? cloudDatabase.studentRoster[0].id : "";
+                loadStudentData(activeStudentId);
+            }
+            
+            saveToLocalStorage();
+            renderStudentRosterUI();
+            updateStudentQuickSelectDropdown();
+            updateBookDropdown();
+            renderActiveMode();
+        }
+    }
 
     function openQuiz() {
         if (systemMode === 'normal') {
             activeQuizPool = getCurrentWords();
-            document.getElementById('quizModalTitle').innerText = "🎯 常規單字隨機測驗";
+            document.getElementById('quizModalTitle').innerText = "🎯 常規單字測驗";
         } else {
             activeQuizPool = [];
             const currentGroups = getCurrentSimilarGroups();
             currentGroups.forEach(g => {
-                g.words.forEach(w => activeQuizPool.push({ ...w, notes: `[類型: ${g.type || '相似字'}] ${w.notes || ''}` }));
+                g.words.forEach(w => activeQuizPool.push({ ...w, notes: `[${g.type || '相似字'}] ${w.notes || ''}` }));
             });
-            document.getElementById('quizModalTitle').innerText = "🎯 相似字混合隨機測驗";
         }
-
-        if (activeQuizPool.length === 0) {
-            alert("當前範圍內沒有單字可供測驗。");
-            return;
-        }
+        if (activeQuizPool.length === 0) { alert("範圍內沒有單字！"); return; }
+        
+        const randomIndex = Math.floor(Math.random() * activeQuizPool.length);
+        currentQuizWord = activeQuizPool[randomIndex];
+        
+        const wrapper = document.getElementById('flashcardWrapper');
+        wrapper.classList.remove('flipped'); 
+        
+        setQuizCardText(); 
         document.getElementById('quizModal').classList.add('active');
-        nextQuiz();
     }
-
-    function closeQuiz() { document.getElementById('quizModal').classList.remove('active'); }
-    function flipCard() { document.getElementById('flashcardWrapper').classList.toggle('flipped'); }
-
+    
     function nextQuiz() {
         if (activeQuizPool.length === 0) return;
         const randomIndex = Math.floor(Math.random() * activeQuizPool.length);
         currentQuizWord = activeQuizPool[randomIndex];
-
-        document.getElementById('flashcardWrapper').classList.remove('flipped');
-        setTimeout(() => {
-            document.getElementById('cardEnglish').innerText = currentQuizWord.english;
-            document.getElementById('cardChinese').innerText = currentQuizWord.chinese;
-            document.getElementById('cardNotes').innerText = currentQuizWord.notes || "(無備註)";
-        }, 150);
+        
+        const wrapper = document.getElementById('flashcardWrapper');
+        if (wrapper.classList.contains('flipped')) {
+            wrapper.classList.remove('flipped');
+            setTimeout(() => {
+                setQuizCardText();
+            }, 150); 
+        } else {
+            setQuizCardText(); 
+        }
     }
 
-    function speakCurrentQuiz() { if (currentQuizWord) speak(currentQuizWord.english); }
+    function setQuizCardText() {
+        document.getElementById('cardEnglish').innerText = currentQuizWord.english;
+        document.getElementById('cardChinese').innerText = currentQuizWord.chinese;
+        document.getElementById('cardNotes').innerText = currentQuizWord.notes || "(無備註)";
+    }
+
+    function closeQuiz() { document.getElementById('quizModal').classList.remove('active'); }
+    
+    function speakCurrentQuiz() {
+        if (currentQuizWord && currentQuizWord.english) {
+            speak(currentQuizWord.english);
+        }
+    }
+
+    function updateBookDropdown() {
+        const isValidBook = bookList.some(b => b.id === currentBookId);
+        if (!isValidBook && currentBookId !== "all-books-review") {
+            currentBookId = bookList.length > 0 ? bookList[0].id : "all-books-review";
+        }
+
+        const select = document.getElementById('bookSelect'); 
+        select.innerHTML = '';
+        
+        bookList.forEach(book => {
+            const opt = document.createElement('option'); 
+            opt.value = book.id; 
+            opt.innerText = book.name;
+            select.appendChild(opt);
+        });
+        
+        const allOpt = document.createElement('option');
+        allOpt.value = "all-books-review"; 
+        allOpt.innerText = "📊 所有單字一覽 (自動累計次數)";
+        select.appendChild(allOpt);
+
+        select.value = currentBookId;
+        updateBookDropdownButtons();
+    }
+
+    function updateBookDropdownButtons() {
+        const deleteBtn = document.getElementById('deleteBookBtn');
+        const openFormBtn = document.getElementById('openFormBtn');
+        if (currentBookId === "all-books-review") {
+            if (deleteBtn) deleteBtn.style.display = "none";
+            if (openFormBtn) openFormBtn.style.display = "none";
+        } else {
+            if (deleteBtn && isAdmin) deleteBtn.style.display = "inline-block";
+            if (openFormBtn && isAdmin) openFormBtn.style.display = "inline-block";
+        }
+    }
+
+    function updateStudentQuickSelectDropdown() {
+        const select = document.getElementById('studentQuickSelect');
+        select.innerHTML = '';
+        if (!cloudDatabase.studentRoster) return;
+
+        cloudDatabase.studentRoster.forEach(student => {
+            const opt = document.createElement('option');
+            opt.value = student.id; opt.innerText = student.name;
+            select.appendChild(opt);
+        });
+        
+        select.value = activeStudentId;
+    }
+
+    function handleStudentQuickSwitch() {
+        const select = document.getElementById('studentQuickSelect');
+        const studentId = select.value;
+        if (studentId) {
+            activeStudentId = studentId;
+            loadStudentData(studentId);
+            updateBookDropdown();
+            renderActiveMode();
+        }
+    }
+
+    function flipCard() { 
+        document.getElementById('flashcardWrapper').classList.toggle('flipped'); 
+    }
 
     function toggleTranslation() {
         const table = document.getElementById('vocabTable');
         const grid = document.getElementById('similarGridContainer');
-        table.classList.toggle('hide-translation');
-        grid.classList.toggle('hide-translation');
+        table.classList.toggle('hide-translation'); grid.classList.toggle('hide-translation');
+    }
+
+    function createNewBook() {
+        if (!isAdmin) return;
+        
+        if (!activeStudentId) {
+            if (cloudDatabase.studentRoster && cloudDatabase.studentRoster.length > 0) {
+                activeStudentId = cloudDatabase.studentRoster[0].id;
+                loadStudentData(activeStudentId);
+            } else {
+                alert("⚠️ 請先建立學生資料夾並切換，才能新增課堂日期！");
+                const sidebar = document.getElementById('slidingSidebar');
+                if (sidebar) sidebar.classList.add('active'); 
+                return;
+            }
+        }
+
+        if (!cloudDatabase.database) cloudDatabase.database = {};
+        if (!cloudDatabase.database[activeStudentId]) {
+            cloudDatabase.database[activeStudentId] = [];
+        }
+        bookList = cloudDatabase.database[activeStudentId];
+
+        const name = prompt("請輸入課堂主題日期名稱 (如: 8月15日 L1-L3)：");
+        if (name && name.trim() !== "") {
+            const id = "book-" + Date.now();
+            bookList.push({ id, name: name.trim(), words: [], similarGroups: [] });
+            currentBookId = id; 
+            currentSortColumn = 'english'; 
+            saveToLocalStorage(); 
+            updateBookDropdown(); 
+            renderActiveMode();
+        }
+    }
+
+    function deleteCurrentBook() {
+        if (!isAdmin || currentBookId === "all-books-review") return;
+        const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        const normalCount = (book.words || []).length;
+        const similarCount = (book.similarGroups || []).length;
+
+        if (normalCount === 0 && similarCount === 0) {
+            if (confirm(`「${book.name}」無資料，是否刪除此日期課堂？`)) performDeleteBook(book.id);
+            return;
+        }
+        const choice = prompt(`請輸入代號進行刪除：\n[ 1 ] 僅清除常規單字\n[ 2 ] 僅清除相似字組\n[ 3 ] 徹底刪除整個課堂日期`);
+        if (choice === null) return;
+        const trimmed = choice.trim();
+        if (trimmed === '1') {
+            if (confirm("確認清除常規單字？")) { book.words = []; saveToLocalStorage(); renderActiveMode(); }
+        } else if (trimmed === '2') {
+            if (confirm("確認清除對比字組？")) { book.similarGroups = []; saveToLocalStorage(); renderActiveMode(); }
+        } else if (trimmed === '3') {
+            if (confirm("確認移除整日課堂？")) performDeleteBook(book.id);
+        }
+    }
+
+    function performDeleteBook(bookId) {
+        bookList = bookList.filter(b => b.id !== bookId);
+        currentBookId = bookList.length > 0 ? bookList[0].id : "all-books-review";
+        currentSortColumn = (currentBookId === "all-books-review") ? 'count' : 'english'; 
+        saveToLocalStorage(); updateBookDropdown(); renderActiveMode();
     }
 
     function speak(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
+            const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
         }
     }
 
     document.getElementById('searchInput').addEventListener('input', function(e) {
-        if (systemMode === 'normal') {
-            renderTable(e.target.value);
-        } else {
-            renderSimilarTable(e.target.value);
-        }
+        if (systemMode === 'normal') renderTable(e.target.value);
+        else renderSimilarTable(e.target.value);
     });
 
-    // 匯出包含安全密碼特徵碼的 JSON
-    function exportData() {
-        if (!isAdmin) return;
-        const payload = {
-            adminPasswordHash: localStorage.getItem('adminPasswordHash'),
-            books: bookList
-        };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", "all_vocab_system_backup.json");
-        document.body.appendChild(downloadAnchor); downloadAnchor.click(); downloadAnchor.remove();
+    function escapeHTML(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+    function escapeJS(str) { return str.replace(/'/g, "\\'"); }
+
+    function switchBook() {
+        currentBookId = document.getElementById('bookSelect').value;
+        
+        if (currentBookId === "all-books-review") {
+            systemMode = "normal";
+            document.getElementById('modeTabNormal').classList.add('active');
+            document.getElementById('modeTabSimilar').classList.remove('active');
+            document.getElementById('normalTableContainer').style.display = 'block';
+            document.getElementById('similarGridContainer').style.display = 'none';
+            toggleForm(false);
+        }
+        
+        currentSortColumn = (currentBookId === "all-books-review") ? 'count' : 'english';
+        isSortAsc = (currentBookId !== "all-books-review");
+        
+        updateBookDropdownButtons(); 
+        renderActiveMode(); 
     }
 
-    // 匯入包含安全密碼特徵碼的 JSON
-    function importData(event) {
+    function switchSystemMode(mode) {
+        systemMode = mode;
+        document.getElementById('modeTabNormal').classList.remove('active');
+        document.getElementById('modeTabSimilar').classList.remove('active');
+        document.getElementById('normalTableContainer').style.display = 'none';
+        document.getElementById('similarGridContainer').style.display = 'none';
+        toggleForm(false);
+        
+        if (mode === 'normal') {
+            document.getElementById('modeTabNormal').classList.add('active');
+            document.getElementById('normalTableContainer').style.display = 'block';
+        } else {
+            document.getElementById('modeTabSimilar').classList.add('active');
+            document.getElementById('similarGridContainer').style.display = 'grid';
+        }
+        
+        if (mode === 'similar' && currentBookId === "all-books-review") {
+            currentBookId = bookList.length > 0 ? bookList[0].id : "";
+        }
+        
+        updateBookDropdown(); 
+        renderActiveMode();
+    }
+
+    function getCurrentSimilarGroups() {
+        if (currentBookId === "all-books-review") {
+            const allGroups = [];
+            bookList.forEach(book => {
+                if (book.similarGroups) {
+                    book.similarGroups.forEach(g => allGroups.push(g));
+                }
+            });
+            return allGroups;
+        }
+        const book = bookList.find(b => b.id === currentBookId);
+        return book ? (book.similarGroups || []) : [];
+    }
+
+    async function saveGistSettings() {
+        const gistId = document.getElementById('gistIdInput').value.trim();
+        const token = document.getElementById('gistTokenInput').value.trim();
+        if (!gistId || !token) { alert("請填入完整主機設定！"); return; }
+        
+        localStorage.setItem('gist_sync_id', gistId); 
+        localStorage.setItem('gist_sync_token', token);
+        
+        alert("🔒 雲端資料庫連結設定完成，將自動重載連線！");
+        const base = window.location.origin + window.location.pathname;
+        const studentQuery = activeStudentId ? `&s=${activeStudentId}` : "";
+        window.location.href = `${base}?id=${gistId}${studentQuery}`;
+    }
+
+    async function syncToCloud() {
         if (!isAdmin) return;
+        const gistId = localStorage.getItem('gist_sync_id');
+        const token = localStorage.getItem('gist_sync_token');
+        if (!gistId || !token) { alert("請先填入 Gist ID 與金鑰！"); return; }
+        const syncBtn = document.getElementById('syncToCloudBtn');
+        syncBtn.innerText = "⏳ 正在同步雲端庫..."; syncBtn.disabled = true;
+
+        saveToLocalStorage(); 
+
+        try {
+            const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Authorization': `token ${token.trim()}`, 
+                    'Accept': 'application/vnd.github.v3+json', 
+                    'Content-Type': 'application/json' 
+                },
+                body: JSON.stringify({ 
+                    files: { 
+                        "vocab.json": { 
+                            content: JSON.stringify(cloudDatabase, null, 2) 
+                        } 
+                    } 
+                })
+            });
+            if (!response.ok) throw new Error("傳輸失敗，請確認讀寫權限。");
+            alert("🎉 【雲端同步完成】全班學生單字簿已成功更新！");
+        } catch (error) {
+            alert("❌ 同步失敗: " + error.message);
+        } finally {
+            syncBtn.innerText = "☁️ 一鍵同步全班至雲端"; syncBtn.disabled = false;
+        }
+    }
+
+    function resetDatabase() {
+        if (!isAdmin) return;
+        const confirmPhrase = prompt("⚠️ 警告：此操作將刪除本機名冊與所有單字！若確認重置，請在下方輸入 RESET：");
+        if (confirmPhrase === "RESET") {
+            cloudDatabase = {
+                adminPasswordHash: "",
+                studentRoster: [],
+                database: {}
+            };
+            bookList = [];
+            currentBookId = "";
+            activeStudentId = "";
+            
+            saveToLocalStorage(); 
+            renderStudentRosterUI();
+            updateStudentQuickSelectDropdown();
+            updateBookDropdown();
+            renderActiveMode();
+            
+            alert("🧹 資料夾已被徹底重置！");
+        } else {
+            alert("已取消。");
+        }
+    }
+
+    function exportCurrentBook() {
+        if (!currentBookId || currentBookId === "all-books-review") {
+            alert("⚠️ 請選擇特定的課堂日期進行匯出！");
+            return;
+        }
+        const book = bookList.find(b => b.id === currentBookId);
+        if (!book) return;
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(book, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `vocab-${book.name}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function importCurrentBook(event) {
+        if (!currentBookId || currentBookId === "all-books-review") {
+            alert("⚠️ 請選擇特定的課堂日期進行匯入！");
+            return;
+        }
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const imported = JSON.parse(e.target.result);
-                let valid = false;
-                
-                if (Array.isArray(imported)) {
-                    bookList = imported;
-                    valid = true;
-                } else if (imported && imported.books) {
-                    bookList = imported.books;
-                    if (imported.adminPasswordHash) {
-                        localStorage.setItem('adminPasswordHash', imported.adminPasswordHash);
-                    }
-                    valid = true;
+                const importedData = JSON.parse(e.target.result);
+                const book = bookList.find(b => b.id === currentBookId);
+                if (book) {
+                    book.words = importedData.words || [];
+                    book.similarGroups = importedData.similarGroups || [];
+                    saveToLocalStorage();
+                    renderActiveMode();
+                    alert("📥 單字匯入成功！");
                 }
-
-                if (valid) {
-                    if (confirm('匯入將會完整覆蓋目前所有日期單字與相似字，確定覆蓋嗎？')) {
-                        if (bookList.length > 0) currentBookId = bookList[0].id;
-                        saveToLocalStorage();
-                        updateBookDropdown();
-                        renderActiveMode();
-                        alert('資料與密碼設定已同步還原成功！');
-                    }
-                } else {
-                    alert('資料格式不正確，需為整合型備份檔案。');
-                }
-            } catch (err) { alert('檔案解析失敗。'); }
+            } catch (err) {
+                alert("❌ 解析失敗。");
+            }
         };
         reader.readAsText(file);
-        event.target.value = '';
     }
 
-    function escapeHTML(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    function showSyncStatus(isOnline, message) {
+        const indicator = document.getElementById('syncIndicator');
+        if (!indicator) return;
+        indicator.innerText = message;
+        indicator.style.display = 'inline-block';
+        if (isOnline) {
+            indicator.className = 'sync-badge-online';
+        } else {
+            indicator.className = 'sync-badge-offline';
+        }
     }
 
-    function escapeJS(str) {
-        return str.replace(/'/g, "\\'");
+    // 連帶切換未登入狀態下的「學習秘笈」與「未登入提示」卡片
+    function updateSidebarPrompt() {
+        const prompt = document.getElementById('sidebarLoginPrompt');
+        const guide = document.getElementById('sidebarStudentGuide');
+        if (prompt) {
+            prompt.style.display = isAdmin ? 'none' : 'block';
+        }
+        if (guide) {
+            guide.style.display = isAdmin ? 'none' : 'block';
+        }
+    }
+
+    function renderActiveMode() {
+        const filterVal = document.getElementById('searchInput').value;
+        if (systemMode === 'normal') renderTable(filterVal);
+        else renderSimilarTable(filterVal);
+        updateStats();
     }
 </script>
 
