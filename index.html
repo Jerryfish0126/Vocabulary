@@ -172,7 +172,7 @@
         .student-switcher-box { background-color: #eef0eb; padding: 4px 12px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid #cbd7c9; }
         .student-switcher-select { background: transparent; border: none; color: var(--primary-color); font-weight: 700; font-size: 14px; outline: none; cursor: pointer; }
         
-        /* 💡 藥丸卡片名冊列表樣式 */
+        /* 藥丸卡片名冊列表樣式 */
         .roster-pills {
             display: flex; flex-direction: column; gap: 8px;
             max-height: 250px; overflow-y: auto; padding: 4px;
@@ -191,7 +191,7 @@
         }
         .roster-pill-name { font-weight: 700; font-size: 13px; color: var(--primary-color); }
 
-        /* 💡 控制面板美化裝飾樣式 */
+        /* 控制面板美化裝飾樣式 */
         .sidebar-header-divider {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 5px; width: 100%;
@@ -215,7 +215,7 @@
             box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.06);
         }
 
-        /* 🚀 右側懸浮管理總控台樣式 */
+        /* 右側懸浮管理總控台樣式 */
         .sliding-sidebar {
             display: flex; flex-direction: column; gap: 20px;
             position: fixed; top: 0; right: -460px;
@@ -228,14 +228,14 @@
             z-index: 5000;
             transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             
-            /* 💡 修正對策：選單與把手預設為不顯示，防範學生與登入介面誤觸，安全隱蔽 */
+            /* 選單與把手預設為不顯示，防範學生與登入介面誤觸，安全隱蔽 */
             display: none !important; 
         }
         
         /* 側邊欄狀態開啟 */
         .sliding-sidebar.active { right: 0 !important; }
         
-        /* 💡 膠囊拉頁把手 */
+        /* 膠囊拉頁把手 */
         .sidebar-handle {
             position: fixed; top: 120px; right: 0; 
             width: 28px; height: 75px; 
@@ -246,17 +246,17 @@
             z-index: 5001; 
             transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), background-color 0.2s, color 0.2s;
             
-            /* 💡 修正對策：把手預設隱藏 */
+            /* 把手預設隱藏 */
             display: none !important; 
         }
         .sidebar-handle:hover { color: white; background: var(--primary-hover); }
         
-        /* 💡 連動效果：當控制台展開時，把手跟著向左推移 460px */
+        /* 連動效果：當控制台展開時，把手跟著向左推移 460px */
         .sliding-sidebar.active + .sidebar-handle {
             right: 460px !important;
         }
         
-        /* 💡 箭頭自動轉向 */
+        /* 箭頭自動轉向 */
         .sidebar-handle::before {
             content: "◀";
         }
@@ -264,7 +264,7 @@
             content: "▶";
         }
 
-        /* 💡 解鎖登入管理員後才顯示選單把手與選單本體 */
+        /* 解鎖登入管理員後才顯示選單把手與選單本體 */
         body.admin-mode .sliding-sidebar {
             display: flex !important;
         }
@@ -462,7 +462,7 @@
     
     <!-- 💡 管理員頂部標題區 -->
     <div class="sidebar-header-divider">
-        <h3 style="margin: 0; color: var(--primary-color); font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">⚙️ 管理員總主機台</h3>
+        <h3 style="margin: 0; color: var(--primary-color); font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">⚙️ 管理員控制台</h3>
     </div>
 
     <!-- 👥 學生管理名冊 (💡 精緻藥丸卡片化排版) -->
@@ -544,6 +544,9 @@
     let activeStudentId = ""; // 目前載入的學生資料夾 ID
     let currentQuizWord = null;
     let activeQuizPool = [];
+
+    // 智慧型平滑高度滾動：儲存編輯前的位置
+    let savedScrollY = 0;
 
     // 標準相容性 SHA-256 純 JS 加密算法
     function sha256(ascii) {
@@ -784,7 +787,7 @@
         }
     }
 
-    // 💡 修正與優化：美化為圓角藥丸式學生名單，取代醜陋的傳統表格
+    // 💡 美化為圓角藥丸式學生名單，加入 ✏️ 編輯姓名按鈕
     function renderStudentRosterUI() {
         const container = document.getElementById('studentRosterContainer');
         if (!container) return;
@@ -797,12 +800,52 @@
             item.innerHTML = `
                 <span class="roster-pill-name">👤 ${escapeHTML(student.name)}</span>
                 <div style="display: flex; gap: 6px;">
-                    <button class="btn btn-primary btn-sm" onclick="copyStudentUrl('${student.id}')" style="background-color: var(--accent-color); font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">📋 複製網址</button>
+                    <button class="btn btn-primary btn-sm" onclick="copyStudentUrl('${student.id}')" style="background-color: var(--accent-color); font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">📋 複製</button>
+                    <!-- 💡 新增 ✏️ 編輯姓名按鈕 -->
+                    <button class="btn btn-secondary btn-sm" onclick="editStudentName('${student.id}')" style="background-color: #4b5563; font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;" title="編輯學生姓名">✏️</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteStudentFromRoster('${student.id}')" style="font-size: 11px; padding: 5px 10px; border-radius: 6px; width: auto; min-width: unset;">🗑️</button>
                 </div>
             `;
             container.appendChild(item);
         });
+    }
+
+    // 💡 編輯學生姓名資料功能（智慧排重與無縫對齊標題）
+    function editStudentName(studentId) {
+        if (!isAdmin) return;
+        const student = cloudDatabase.studentRoster.find(s => s.id === studentId);
+        if (!student) return;
+        
+        const newName = prompt(`✏️ 正在修改學生「${student.name}」的姓名資料\n請輸入新姓名學號 (如: 林小明0807)：`, student.name);
+        
+        if (newName === null) return; 
+        const trimmedName = newName.trim();
+        if (trimmedName === "") {
+            alert("⚠️ 姓名不能為空白！");
+            return;
+        }
+        
+        // 智慧防重複檢索（排除自己）
+        const nameExists = cloudDatabase.studentRoster.some(s => s.name === trimmedName && s.id !== studentId);
+        if (nameExists) {
+            alert("⚠️ 此學生姓名已存在！請輸入不同的名字或加生日數字區隔。");
+            return;
+        }
+        
+        // 寫入更新
+        student.name = trimmedName;
+        
+        // 智慧對齊：如果目前正開啟的是這個學生的單字本，同步刷新頁面與頁籤標題
+        if (activeStudentId === studentId) {
+            loadStudentData(studentId);
+        }
+        
+        saveToLocalStorage();
+        renderStudentRosterUI();
+        updateStudentQuickSelectDropdown();
+        renderActiveMode();
+        
+        alert("🎉 學生姓名修改成功！");
     }
 
     function copyStudentUrl(studentId) {
@@ -1107,12 +1150,16 @@
             } else {
                 let actionsHTML = '';
                 if (isAdmin) {
-                    actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVocab(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
+                    actionsHTML = `<td><div class="action-btns"><button class="btn btn-secondary btn-sm" onclick="editVococab_scrollHelper(${item.originalIndex})">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteVocab(${item.originalIndex})">刪除</button></div></td>`;
                 }
                 tr.innerHTML = `<td>${englishHTML}</td><td class="chinese-cell"><span>${escapeHTML(chiStr)}</span></td><td>${escapeHTML(notesStr)}</td>${actionsHTML}`;
             }
             tbody.appendChild(tr);
         });
+    }
+
+    function editVococab_scrollHelper(idx) {
+        editVocab(idx);
     }
 
     function renderSimilarTable(filterText = '') {
@@ -1201,13 +1248,24 @@
     function editSimilarGroup(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        
+        savedScrollY = window.scrollY; // 紀錄位置
+        
         switchSimilarTab('single');
         const group = book.similarGroups[index];
         document.getElementById('groupTypeSelect').value = group.type || "相似字";
         document.getElementById('editSimilarIndex').value = index;
         document.getElementById('groupWordsInputs').innerHTML = '';
         group.words.forEach(w => addWordRowToForm(w.english, w.chinese, w.notes));
-        document.getElementById('similarFormTitle').innerText = '編輯對比字組'; toggleForm(true);
+        document.getElementById('similarFormTitle').innerText = '編輯對比字組'; 
+        
+        toggleForm(true);
+        
+        // 自動滑動到上方編輯區
+        setTimeout(() => {
+            const formEl = document.getElementById('similarFormSection');
+            if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
     }
 
     function addNewStudentToRoster() {
@@ -1298,7 +1356,7 @@
         alert(`成功匯入 ${count} 個單字！`);
     }
 
-    // 💡 側邊欄純點擊拉頁（Click-to-Toggle）控制策略
+    // 側邊欄純點擊拉頁（Click-to-Toggle）控制策略
     function setupSidebarInteractions() {
         const sidebar = document.getElementById('slidingSidebar');
         const handle = document.getElementById('sidebarHandle');
@@ -1344,13 +1402,24 @@
     function editVocab(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
+        
+        savedScrollY = window.scrollY; // 紀錄位置
+        
         switchTab('single');
         const item = book.words[index];
         document.getElementById('englishInput').value = item.english;
         document.getElementById('chineseInput').value = item.chinese;
         document.getElementById('notesInput').value = item.notes || '';
         document.getElementById('editIndex').value = index;
-        document.getElementById('formTitle').innerText = '編輯資料'; toggleForm(true);
+        document.getElementById('formTitle').innerText = '編輯資料'; 
+        
+        toggleForm(true);
+        
+        // 自動滑動到上方編輯區
+        setTimeout(() => {
+            const formEl = document.getElementById('vocabFormSection');
+            if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 80);
     }
 
     function deleteVocab(index) {
@@ -1373,7 +1442,14 @@
         }
         
         normForm.classList.remove('active'); simForm.classList.remove('active');
-        if (show === false) return;
+        if (show === false) {
+            // 當隱藏/儲存/取消時，自動帶領老師滑回原先編輯前的位置
+            if (savedScrollY > 0) {
+                window.scrollTo({ top: savedScrollY, behavior: 'smooth' });
+                savedScrollY = 0; // 滑完重置
+            }
+            return;
+        }
 
         if (systemMode === 'normal') {
             if (show === true) normForm.classList.add('active');
@@ -1460,7 +1536,7 @@
                 loadStudentData("");
             }
             
-            updateViewVisibility(); updateStudentQuickSelectDropdown(); updateBookDropdown(); updateSidebarPrompt(); renderActiveMode(); renderStudentRosterUI();
+            updateViewVisibility(); updateStudentQuickSelectDropdown(); updateBookDropdown(); renderActiveMode(); renderStudentRosterUI();
         } else {
             isAdmin = false; document.body.classList.remove('admin-mode');
             toggleForm(false);
@@ -1468,7 +1544,7 @@
             const urlStudent = getStudentKeyFromUrl();
             if (!urlStudent) activeStudentId = "";
             
-            updateViewVisibility(); updateBookDropdown(); updateSidebarPrompt(); renderActiveMode();
+            updateViewVisibility(); updateBookDropdown(); renderActiveMode();
         }
     }
 
@@ -1703,11 +1779,6 @@
         }
     }
 
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        if (systemMode === 'normal') renderTable(e.target.value);
-        else renderSimilarTable(e.target.value);
-    });
-
     function escapeHTML(str) { return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
     function escapeJS(str) { return str.replace(/'/g, "\\'"); }
 
@@ -1893,18 +1964,6 @@
             indicator.className = 'sync-badge-online';
         } else {
             indicator.className = 'sync-badge-offline';
-        }
-    }
-
-    // 連帶切換未登入狀態下的「學習秘笈」與「未登入提示」卡片
-    function updateSidebarPrompt() {
-        const prompt = document.getElementById('sidebarLoginPrompt');
-        const guide = document.getElementById('sidebarStudentGuide');
-        if (prompt) {
-            prompt.style.display = isAdmin ? 'none' : 'block';
-        }
-        if (guide) {
-            guide.style.display = isAdmin ? 'none' : 'block';
         }
     }
 
