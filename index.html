@@ -358,6 +358,7 @@
         </div>
 
         <div class="controls">
+            <!-- 搜尋欄位 -->
             <input type="text" id="searchInput" class="search-bar" placeholder="搜尋英文、中文或註記...">
             <button id="openFormBtn" class="btn btn-success teacher-only" onclick="toggleForm()">＋ 新增字組/單字</button>
             <button class="btn btn-warning" onclick="openQuiz()">🎯 進入隨機測驗</button>
@@ -460,23 +461,22 @@
 <!-- 🚀 右側滑動管理總控台 -->
 <div class="sliding-sidebar" id="slidingSidebar">
     
-    <!-- 💡 管理員頂部標題區 -->
+    <!-- 管理員頂部標題區 -->
     <div class="sidebar-header-divider">
         <h3 style="margin: 0; color: var(--primary-color); font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 8px;">⚙️ 管理員控制台</h3>
     </div>
 
-    <!-- 👥 學生管理名冊 (💡 精緻藥丸卡片化排版) -->
+    <!-- 👥 學生管理名冊 -->
     <div class="student-manager-card sidebar-section-card">
         <h4>👥 學生自主資料夾管理</h4>
         <div style="display: flex; gap: 8px; margin-bottom: 5px;">
             <input type="text" id="newStudentName" class="sidebar-input-styled" placeholder="新增學生姓名與生日 (如: 林小明0807)">
             <button class="btn btn-primary btn-sm" onclick="addNewStudentToRoster()" style="font-size: 12px; padding: 10px 14px; border-radius: 8px;">＋ 建立</button>
         </div>
-        <!-- 💡 藥丸式卡片名冊展示區 -->
         <div id="studentRosterContainer" class="roster-pills"></div>
     </div>
 
-    <!-- ☁️ 雲端備份儲存設定 (💡 卡片化精緻排版) -->
+    <!-- ☁️ 雲端備份儲存設定 -->
     <div class="sidebar-section-card">
         <h4>☁️ 雲端 Gist 安全備份設定</h4>
         <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
@@ -486,7 +486,7 @@
         </div>
     </div>
 
-    <!-- 💡 雙向雲端同步與單字表導入導出 (💡 功能按鈕精緻化) -->
+    <!-- 雙向雲端同步與單字表導入導出 -->
     <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto; width: 100%;">
         <!-- 雙向同步按鈕組 -->
         <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
@@ -674,6 +674,15 @@
     window.onload = async function() {
         // 先綁定右側拉頁把手，確保 UI 在載入任何數據前 100% 絕對能正常拉展！
         setupSidebarInteractions(); 
+        
+        // 💡 修正對策：將即時查詢監聽（oninput）綁定在 window.onload 最頂端優先執行，確保完全不漏失任何按鍵
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.oninput = function(e) {
+                // 隨鍵輸入，立刻精準過濾下方列表！
+                renderActiveMode(); 
+            };
+        }
         
         await loadData();
         
@@ -1143,7 +1152,12 @@
 
             if (filterText) {
                 const searchLower = filterText.toLowerCase();
-                if (!engStr.toLowerCase().includes(searchLower) && !chiStr.toLowerCase().includes(searchLower)) return;
+                // 同步檢索英、中、與註記欄，三者皆可命中
+                if (!engStr.toLowerCase().includes(searchLower) && 
+                    !chiStr.toLowerCase().includes(searchLower) &&
+                    !notesStr.toLowerCase().includes(searchLower)) {
+                    return;
+                }
             }
             const tr = document.createElement('tr');
             const targetWord = engStr.toLowerCase();
@@ -1178,7 +1192,12 @@
                 const hasMatch = group.words.some(w => {
                     const eng = w.english ? w.english.toString() : "";
                     const chi = w.chinese ? w.chinese.toString() : "";
-                    return eng.toLowerCase().includes(searchLower) || chi.toLowerCase().includes(searchLower);
+                    const note = w.notes ? w.notes.toString() : "";
+                    const gType = group.type ? group.type.toString() : "";
+                    return eng.toLowerCase().includes(searchLower) || 
+                           chi.toLowerCase().includes(searchLower) ||
+                           note.toLowerCase().includes(searchLower) ||
+                           gType.toLowerCase().includes(searchLower);
                 });
                 if (!hasMatch) return;
             }
@@ -1247,7 +1266,8 @@
             if (!book.similarGroups) book.similarGroups = [];
             book.similarGroups.push(groupData);
         } else { book.similarGroups[editIndex] = groupData; }
-        saveToLocalStorage(); renderSimilarTable(); clearSimilarForm(); toggleForm(false);
+        saveToLocalStorage(); clearSimilarForm(); toggleForm(false);
+        renderActiveMode(); 
     }
 
     // 智慧型平滑上滑
@@ -1303,7 +1323,11 @@
     function deleteSimilarGroup(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
-        if (confirm('確認刪除此對比組？')) { book.similarGroups.splice(index, 1); saveToLocalStorage(); renderSimilarTable(); }
+        if (confirm('確認刪除此對比組？')) { 
+            book.similarGroups.splice(index, 1); 
+            saveToLocalStorage(); 
+            renderActiveMode(); 
+        }
     }
 
     function saveBatchSimilarGroups() {
@@ -1339,7 +1363,8 @@
             if (!book.similarGroups) book.similarGroups = [];
             book.similarGroups.push(currentGroup); groupCount++;
         }
-        saveToLocalStorage(); renderSimilarTable(); document.getElementById('batchSimilarInput').value = ''; toggleForm(false);
+        saveToLocalStorage(); clearSimilarForm(); toggleForm(false);
+        renderActiveMode(); 
         alert(`成功新增 ${groupCount} 組，共計 ${wordCount} 個單字！`);
     }
 
@@ -1358,7 +1383,8 @@
                 if (english && chinese) { book.words.push({ english, chinese, notes }); count++; }
             }
         });
-        saveToLocalStorage(); renderTable(); document.getElementById('batchInput').value = ''; toggleForm(false);
+        saveToLocalStorage(); document.getElementById('batchInput').value = ''; toggleForm(false);
+        renderActiveMode(); 
         alert(`成功匯入 ${count} 個單字！`);
     }
 
@@ -1402,7 +1428,8 @@
             book.words.push(data);
         }
         else book.words[editIndex] = data;
-        saveToLocalStorage(); renderTable(); clearForm(); toggleForm(false);
+        saveToLocalStorage(); clearForm(); toggleForm(false);
+        renderActiveMode(); 
     }
 
     // 智慧型平滑上滑
@@ -1432,7 +1459,11 @@
     function deleteVocab(index) {
         if (!isAdmin || currentBookId === "all-books-review") return;
         const book = bookList.find(b => b.id === currentBookId); if (!book) return;
-        if (confirm('確定刪除？')) { book.words.splice(index, 1); saveToLocalStorage(); renderTable(); }
+        if (confirm('確定刪除？')) { 
+            book.words.splice(index, 1); 
+            saveToLocalStorage(); 
+            renderActiveMode(); 
+        }
     }
 
     // 儲存/取消後平滑滑回原處的對策
@@ -1896,7 +1927,7 @@
         }
     }
 
-    // 💡 跨裝置雲端讀取拉取（Pull from Cloud Gist）函式，智慧覆蓋快取並即時渲染更新
+    // 跨裝置雲端讀取拉取
     async function pullFromCloud() {
         if (!isAdmin) return;
         const gistId = localStorage.getItem('gist_sync_id') || getGistIdFromUrl();
